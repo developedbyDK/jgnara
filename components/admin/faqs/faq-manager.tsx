@@ -28,6 +28,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { FaqDialog, type Faq } from "./faq-dialog";
 
 export function FaqManager() {
@@ -36,6 +46,7 @@ export function FaqManager() {
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingFaq, setEditingFaq] = useState<Faq | null>(null);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   const fetchFaqs = useCallback(async () => {
     try {
@@ -72,10 +83,10 @@ export function FaqManager() {
     fetchFaqs();
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm("정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."))
-      return;
-    await fetch(`/api/admin/faqs?id=${id}`, { method: "DELETE" });
+  async function handleDeleteConfirm() {
+    if (!deleteTargetId) return;
+    await fetch(`/api/admin/faqs?id=${deleteTargetId}`, { method: "DELETE" });
+    setDeleteTargetId(null);
     fetchFaqs();
   }
 
@@ -223,7 +234,7 @@ export function FaqManager() {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         className="cursor-pointer text-red-600"
-                        onClick={() => handleDelete(faq.id)}
+                        onClick={() => setDeleteTargetId(faq.id)}
                       >
                         <Trash2 className="mr-2 size-4" />
                         삭제
@@ -255,6 +266,30 @@ export function FaqManager() {
         onClose={handleDialogClose}
         editingFaq={editingFaq}
       />
+
+      {/* 삭제 확인 다이얼로그 */}
+      <AlertDialog
+        open={!!deleteTargetId}
+        onOpenChange={(open) => !open && setDeleteTargetId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>FAQ 삭제</AlertDialogTitle>
+            <AlertDialogDescription>
+              정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="cursor-pointer">취소</AlertDialogCancel>
+            <AlertDialogAction
+              className="cursor-pointer bg-red-600 hover:bg-red-700"
+              onClick={handleDeleteConfirm}
+            >
+              삭제
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

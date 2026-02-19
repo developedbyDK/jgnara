@@ -8,7 +8,6 @@ export interface CategoryRow {
   sort_order: number;
   category_group: "heavy" | "freight";
   icon_key: string | null;
-  category_values: string[];
 }
 
 export interface CategoryTreeNode extends CategoryRow {
@@ -68,8 +67,19 @@ export async function fetchCategoryBySlug(slug: string) {
   return data as CategoryRow;
 }
 
-/** slug에 매핑되는 DB category 값 배열 반환 */
-export async function fetchCategoryValuesBySlug(slug: string): Promise<string[]> {
-  const cat = await fetchCategoryBySlug(slug);
-  return cat?.category_values ?? [];
+/** 하위 카테고리를 slug + parent_id 로 조회 */
+export async function fetchSubcategoryBySlug(
+  subSlug: string,
+  parentId: string
+) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("categories")
+    .select("*")
+    .eq("slug", subSlug)
+    .eq("parent_id", parentId)
+    .single();
+
+  if (error) return null;
+  return data as CategoryRow;
 }

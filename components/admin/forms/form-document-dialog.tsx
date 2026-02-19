@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { toast } from "sonner";
 import { Upload, Loader2 } from "lucide-react";
 import {
   Dialog,
@@ -101,7 +102,7 @@ export function FormDocumentDialog({
 
         if (!uploadRes.ok) {
           const err = await uploadRes.json();
-          alert(err.error || "파일 업로드에 실패했습니다.");
+          toast.error(err.error || "파일 업로드에 실패했습니다.");
           setSaving(false);
           return;
         }
@@ -134,14 +135,14 @@ export function FormDocumentDialog({
 
       if (!res.ok) {
         const err = await res.json();
-        alert(err.error || "저장에 실패했습니다.");
+        toast.error(err.error || "저장에 실패했습니다.");
         setSaving(false);
         return;
       }
 
       onClose();
     } catch {
-      alert("저장 중 오류가 발생했습니다.");
+      toast.error("저장 중 오류가 발생했습니다.");
     } finally {
       setSaving(false);
     }

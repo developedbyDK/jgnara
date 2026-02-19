@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
@@ -25,6 +26,7 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
+import { Button as StatefulButton } from "@/components/ui/stateful-button"
 import { Separator } from "@/components/ui/separator"
 import { Label } from "@/components/ui/label"
 import {
@@ -49,7 +51,7 @@ import {
 } from "@/lib/constants/listing-options"
 import { useHierarchicalCategories } from "@/lib/use-categories"
 
-interface FormData {
+export interface ListingFormData {
   type: string
   year: string
   month: string
@@ -76,7 +78,7 @@ interface FormData {
   listingType: string
 }
 
-const initialFormData: FormData = {
+export const initialListingFormData: ListingFormData = {
   type: "매매",
   year: "",
   month: "",
@@ -103,16 +105,30 @@ const initialFormData: FormData = {
   listingType: "무료",
 }
 
-export function ListingRegisterForm() {
+interface ListingRegisterFormProps {
+  mode?: "create" | "edit"
+  listingId?: string
+  initialData?: ListingFormData
+  initialPhotos?: (string | null)[]
+}
+
+export function ListingRegisterForm({
+  mode = "create",
+  listingId,
+  initialData,
+  initialPhotos,
+}: ListingRegisterFormProps) {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [showLoginModal, setShowLoginModal] = useState(false)
-  const [formData, setFormData] = useState<FormData>(initialFormData)
+  const [formData, setListingFormData] = useState<ListingFormData>(initialData ?? initialListingFormData)
   const { parentOptions, getChildOptions, getLabelById } = useHierarchicalCategories()
   const [photos, setPhotos] = useState<(File | null)[]>(
     Array(PHOTO_SLOT_LABELS.length).fill(null)
   )
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [existingPhotos, setExistingPhotos] = useState<(string | null)[]>(
+    initialPhotos ?? Array(PHOTO_SLOT_LABELS.length).fill(null)
+  )
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   function validate(): Record<string, string> {
@@ -129,19 +145,20 @@ export function ListingRegisterForm() {
     if (!formData.price) e.price = "가격을 입력해주세요"
     if (!formData.companyName) e.companyName = "상호를 입력해주세요"
     if (!formData.contact) e.contact = "연락처를 입력해주세요"
-    if (!photos[0]) e.photo = "대표사진을 등록해주세요"
+    if (!photos[0] && !existingPhotos[0]) e.photo = "대표사진을 등록해주세요"
     return e
   }
 
   useEffect(() => {
+    if (mode === "edit") return
     const supabase = createClient()
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user)
     })
-  }, [])
+  }, [mode])
 
-  function updateField(field: keyof FormData, value: string) {
-    setFormData((prev) => {
+  function updateField(field: keyof ListingFormData, value: string) {
+    setListingFormData((prev) => {
       const next = { ...prev, [field]: value }
       // 카테고리 그룹 변경 시 분류1/분류2 초기화
       if (field === "categoryGroup") {
@@ -175,73 +192,88 @@ export function ListingRegisterForm() {
     })
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-
-    if (!user) {
+  async function handleSubmit() {
+    if (mode === "create" && !user) {
       setShowLoginModal(true)
-      return
+      throw new Error("login_required")
     }
 
     const validationErrors = validate()
     setErrors(validationErrors)
     if (Object.keys(validationErrors).length > 0) {
-      alert("필수 항목을 모두 입력해주세요.")
-      return
+      toast.warning("필수 항목을 모두 입력해주세요.")
+      throw new Error("validation_failed")
     }
-
-    setIsSubmitting(true)
 
     try {
       const supabase = createClient()
 
-      // 1) listings 테이블에 데이터 삽입
-      const { data: listing, error: insertError } = await supabase
-        .from("listings")
-        .insert({
-          user_id: user.id,
-          type: formData.type,
-          year: Number(formData.year),
-          month: Number(formData.month),
-          category: getLabelById(formData.category),
-          subcategory: formData.subcategory ? getLabelById(formData.subcategory) : null,
-          condition: formData.condition,
-          manufacturer: formData.manufacturer,
-          model: formData.model,
-          engine: formData.engine || null,
-          transmission: formData.transmission || null,
-          tonnage: formData.tonnage ? Number(formData.tonnage) : null,
-          price: Number(formData.price),
-          region: formData.region,
-          payment: formData.payment || null,
-          usage_amount: formData.usage ? Number(formData.usage) : null,
-          usage_unit: formData.usage ? formData.usageUnit : null,
-          undercarriage_type: formData.undercarriageType || null,
-          undercarriage_condition: formData.undercarriageCondition || null,
-          company_name: formData.companyName || null,
-          contact: formData.contact,
-          youtube_url: formData.youtubeUrl || null,
-          description: formData.description || null,
-          listing_type: formData.listingType,
-        })
-        .select("id")
-        .single()
+      const listingPayload = {
+        type: formData.type,
+        year: Number(formData.year),
+        month: Number(formData.month),
+        category: getLabelById(formData.category),
+        subcategory: formData.subcategory ? getLabelById(formData.subcategory) : null,
+        condition: formData.condition,
+        manufacturer: formData.manufacturer,
+        model: formData.model,
+        engine: formData.engine || null,
+        transmission: formData.transmission || null,
+        tonnage: formData.tonnage ? Number(formData.tonnage) : null,
+        price: Number(formData.price),
+        region: formData.region,
+        payment: formData.payment || null,
+        usage_amount: formData.usage ? Number(formData.usage) : null,
+        usage_unit: formData.usage ? formData.usageUnit : null,
+        undercarriage_type: formData.undercarriageType || null,
+        undercarriage_condition: formData.undercarriageCondition || null,
+        company_name: formData.companyName || null,
+        contact: formData.contact,
+        youtube_url: formData.youtubeUrl || null,
+        description: formData.description || null,
+        listing_type: formData.listingType,
+      }
 
-      if (insertError) throw insertError
+      let targetListingId: string
 
-      // 2) 사진 WebP 변환 후 업로드 (있는 것만)
-      const validPhotos = photos.filter((f): f is File => f !== null)
-      if (validPhotos.length > 0) {
-        const photoUrls: string[] = []
+      if (mode === "edit" && listingId) {
+        // ── 수정 모드 ──
+        const { error: updateError } = await supabase
+          .from("listings")
+          .update(listingPayload)
+          .eq("id", listingId)
 
-        for (let i = 0; i < validPhotos.length; i++) {
-          const compressed = await compressImageToWebP(validPhotos[i])
-          const filePath = `${listing.id}/${i}.webp`
+        if (updateError) throw updateError
+        targetListingId = listingId
+      } else {
+        // ── 등록 모드 ──
+        const { data: listing, error: insertError } = await supabase
+          .from("listings")
+          .insert({ ...listingPayload, user_id: user!.id })
+          .select("id")
+          .single()
+
+        if (insertError) throw insertError
+        targetListingId = listing.id
+      }
+
+      // 사진 처리: 새 파일 업로드 + 기존 URL 유지
+      const finalPhotoUrls: string[] = []
+
+      for (let i = 0; i < PHOTO_SLOT_LABELS.length; i++) {
+        const file = photos[i]
+        const existing = existingPhotos[i]
+
+        if (file) {
+          // 새 파일 업로드
+          const compressed = await compressImageToWebP(file)
+          const filePath = `${targetListingId}/${i}.webp`
 
           const { error: uploadError } = await supabase.storage
             .from("listing-photos")
             .upload(filePath, compressed, {
               contentType: "image/webp",
+              upsert: true,
             })
 
           if (uploadError) throw uploadError
@@ -250,32 +282,41 @@ export function ListingRegisterForm() {
             .from("listing-photos")
             .getPublicUrl(filePath)
 
-          photoUrls.push(urlData.publicUrl)
+          finalPhotoUrls.push(urlData.publicUrl)
+        } else if (existing) {
+          // 기존 URL 유지
+          finalPhotoUrls.push(existing)
         }
-
-        // 3) photos 배열 업데이트
-        const { error: updateError } = await supabase
-          .from("listings")
-          .update({ photos: photoUrls })
-          .eq("id", listing.id)
-
-        if (updateError) throw updateError
       }
 
-      alert("매물이 등록되었습니다.")
-      router.push("/")
+      // photos 배열 업데이트
+      if (finalPhotoUrls.length > 0) {
+        const { error: photoUpdateError } = await supabase
+          .from("listings")
+          .update({ photos: finalPhotoUrls })
+          .eq("id", targetListingId)
+
+        if (photoUpdateError) throw photoUpdateError
+      }
+
+      if (mode === "edit") {
+        toast.success("매물이 수정되었습니다.")
+        router.push("/mypage")
+      } else {
+        toast.success("매물이 등록되었습니다.")
+        router.push("/")
+      }
     } catch (err) {
       console.error(err)
-      alert("매물 등록에 실패했습니다. 다시 시도해주세요.")
-    } finally {
-      setIsSubmitting(false)
+      toast.error(mode === "edit" ? "매물 수정에 실패했습니다. 다시 시도해주세요." : "매물 등록에 실패했습니다. 다시 시도해주세요.")
+      throw err
     }
   }
 
   const req = <span className="text-destructive">*</span>
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
       {/* ── 기본 정보 ── */}
       <section>
         <h2 className="mb-4 text-base font-semibold">기본 정보</h2>
@@ -680,6 +721,14 @@ export function ListingRegisterForm() {
                   key={i}
                   label={label}
                   file={photos[i]}
+                  existingUrl={existingPhotos[i]}
+                  onRemoveExisting={() => {
+                    setExistingPhotos((prev) => {
+                      const next = [...prev]
+                      next[i] = null
+                      return next
+                    })
+                  }}
                   onFileChange={(file) => {
                     updatePhoto(i, file)
                     if (i === 0 && file && errors.photo) {
@@ -744,13 +793,13 @@ export function ListingRegisterForm() {
       </section>
 
       <div className="flex justify-end pt-4">
-        <Button
-          type="submit"
+        <StatefulButton
+          type="button"
           className="cursor-pointer px-8"
-          disabled={isSubmitting}
+          onClick={handleSubmit}
         >
-          {isSubmitting ? "등록 중..." : "매물 등록"}
-        </Button>
+          {mode === "edit" ? "매물 수정" : "매물 등록"}
+        </StatefulButton>
       </div>
 
       {/* 비회원 로그인 유도 모달 */}

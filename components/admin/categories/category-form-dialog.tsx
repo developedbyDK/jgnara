@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
+import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import {
   Dialog,
@@ -40,7 +41,6 @@ export function CategoryFormDialog({
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [group, setGroup] = useState<"heavy" | "freight">("heavy");
-  const [categoryValues, setCategoryValues] = useState("");
   const [isPending, startTransition] = useTransition();
 
   const isEdit = !!editTarget;
@@ -50,11 +50,9 @@ export function CategoryFormDialog({
       setName(editTarget.label);
       setSlug(editTarget.slug);
       setGroup(editTarget.category_group);
-      setCategoryValues(editTarget.category_values.join(", "));
     } else {
       setName("");
       setSlug("");
-      setCategoryValues("");
     }
   }, [editTarget, open]);
 
@@ -67,18 +65,12 @@ export function CategoryFormDialog({
   function handleSubmit() {
     if (!name.trim() || !slug.trim()) return;
 
-    const values = categoryValues
-      .split(",")
-      .map((v) => v.trim())
-      .filter(Boolean);
-
     startTransition(async () => {
       try {
         if (isEdit) {
           await updateCategory(editTarget.id, {
             label: name.trim(),
             slug: slug.trim(),
-            categoryValues: values,
           });
         } else {
           await createCategory({
@@ -86,15 +78,13 @@ export function CategoryFormDialog({
             slug: slug.trim(),
             parentId: parentId,
             categoryGroup: group,
-            categoryValues: values,
           });
         }
         onOpenChange(false);
         setName("");
         setSlug("");
-        setCategoryValues("");
       } catch {
-        alert(isEdit ? "수정 실패" : "추가 실패");
+        toast.error(isEdit ? "수정에 실패했습니다." : "추가에 실패했습니다.");
       }
     });
   }
@@ -144,21 +134,6 @@ export function CategoryFormDialog({
                   </SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-          )}
-          {!parentId && (
-            <div className="space-y-2">
-              <Label htmlFor="cat-values">매물분류 매핑값</Label>
-              <Input
-                id="cat-values"
-                value={categoryValues}
-                onChange={(e) => setCategoryValues(e.target.value)}
-                placeholder="쉼표로 구분 (예: 굴삭기, 미니굴삭기)"
-                className="font-mono text-sm"
-              />
-              <p className="text-xs text-muted-foreground">
-                매물등록 폼의 분류 선택에 표시되는 값입니다.
-              </p>
             </div>
           )}
         </div>

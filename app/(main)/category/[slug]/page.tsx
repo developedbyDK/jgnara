@@ -89,8 +89,7 @@ export default async function CategoryPage({
 
         {/* Listing Content (Client Component) */}
         <CategoryListingContent
-          categorySlug={slug}
-          categoryValues={category.category_values}
+          categoryLabel={category.label}
         />
       </div>
     </CategorySidebar>

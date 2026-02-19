@@ -18,7 +18,7 @@ export async function GET(request: Request) {
     let query = supabase
       .from("ad_purchases")
       .select(
-        "*, ad_products(name, slug, ad_zone), profiles:user_id(full_name, email)"
+        "*, ad_products(name, slug, ad_zone), profiles!ad_purchases_user_id_profiles_fkey(full_name, email)"
       )
       .order("created_at", { ascending: false });
 

@@ -30,6 +30,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   CreditPackageDialog,
   type CreditPackage,
 } from "./credit-package-dialog";
@@ -44,6 +54,7 @@ export function CreditPackageManager() {
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPkg, setEditingPkg] = useState<CreditPackage | null>(null);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   const fetchPackages = useCallback(async () => {
     try {
@@ -89,10 +100,10 @@ export function CreditPackageManager() {
     fetchPackages();
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm("정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."))
-      return;
-    await fetch(`/api/admin/credits?id=${id}`, { method: "DELETE" });
+  async function handleDeleteConfirm() {
+    if (!deleteTargetId) return;
+    await fetch(`/api/admin/credits?id=${deleteTargetId}`, { method: "DELETE" });
+    setDeleteTargetId(null);
     fetchPackages();
   }
 
@@ -286,7 +297,7 @@ export function CreditPackageManager() {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         className="cursor-pointer text-red-600"
-                        onClick={() => handleDelete(pkg.id)}
+                        onClick={() => setDeleteTargetId(pkg.id)}
                       >
                         <Trash2 className="mr-2 size-4" />
                         삭제
@@ -318,6 +329,30 @@ export function CreditPackageManager() {
         onClose={handleDialogClose}
         editingPackage={editingPkg}
       />
+
+      {/* 삭제 확인 다이얼로그 */}
+      <AlertDialog
+        open={!!deleteTargetId}
+        onOpenChange={(open) => !open && setDeleteTargetId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>패키지 삭제</AlertDialogTitle>
+            <AlertDialogDescription>
+              정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="cursor-pointer">취소</AlertDialogCancel>
+            <AlertDialogAction
+              className="cursor-pointer bg-red-600 hover:bg-red-700"
+              onClick={handleDeleteConfirm}
+            >
+              삭제
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

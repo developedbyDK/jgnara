@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
+import GoogleAnalytics from "@/components/google-analytics";
 import "./globals.css";
 
 const geistMono = Geist_Mono({
@@ -29,6 +30,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${geistMono.variable} antialiased`}>
+        <GoogleAnalytics />
         {children}
         <Toaster richColors position="top-center" />
       </body>

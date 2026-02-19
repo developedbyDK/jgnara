@@ -159,7 +159,7 @@ export function AboutContent() {
             <div key={item.year} className="relative flex gap-4 pb-6 last:pb-0">
               {/* Timeline line */}
               <div className="flex flex-col items-center">
-                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center border border-neutral-300 bg-neutral-900 text-xs font-bold text-white dark:border-neutral-600 dark:bg-neutral-100 dark:text-neutral-900">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center border border-neutral-300 bg-neutral-900 text-xs font-bold text-white dark:border-neutral-600 dark:bg-neutral-100 dark:text-neutral-900">
                   <IconCalendar className="h-4 w-4" />
                 </div>
                 {idx < HISTORY.length - 1 && (
@@ -198,7 +198,7 @@ export function AboutContent() {
           <InfoRow
             icon={<IconBuildingSkyscraper className="h-4 w-4" />}
             label="회사명"
-            value="중기나라 (주)"
+            value="실마릴테크놀로지스 주식회사"
           />
           <InfoRow
             icon={<IconMapPin className="h-4 w-4" />}
@@ -244,7 +244,7 @@ function InfoRow({
   return (
     <div className="flex items-center gap-3 px-5 py-3">
       <span className="text-neutral-400 dark:text-neutral-500">{icon}</span>
-      <span className="w-20 flex-shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400">
+      <span className="w-20 shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400">
         {label}
       </span>
       <span className="text-sm text-neutral-900 dark:text-neutral-100">

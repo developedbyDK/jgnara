@@ -48,17 +48,18 @@ export function BannerAside() {
     return (
       <>
         <Link href="/advertising" className="cursor-pointer">
-          <CardSpotlight className="flex h-[120px] items-center justify-center p-4">
+          <CardSpotlight className="flex h-30 items-center justify-center p-4">
             <div className="relative z-20 text-center">
-              <p className="text-sm font-bold text-white">광고문의</p>
+              <p className="text-sm font-bold text-white">중기나라 AD</p>
               <p className="mt-1 text-xs text-neutral-400">
-                배너 광고를 원하시면 클릭하세요
+                중기나라 광고로 매출을 늘려보세요
+                <br /> mail: contact@silmaril.io
               </p>
             </div>
           </CardSpotlight>
         </Link>
         {Array.from({ length: 3 }).map((_, i) => (
-          <Skeleton key={i} className="h-[120px] w-full" />
+          <Skeleton key={i} className="h-30 w-full" />
         ))}
       </>
     );
@@ -67,11 +68,12 @@ export function BannerAside() {
   return (
     <>
       <Link href="/advertising" className="cursor-pointer">
-        <CardSpotlight className="flex h-[120px] items-center justify-center p-4">
+        <CardSpotlight className="flex h-30 items-center justify-center p-4">
           <div className="relative z-20 text-center">
-            <p className="text-sm font-bold text-white">광고문의</p>
+            <p className="text-sm font-bold text-white">중기나라 AD</p>
             <p className="mt-1 text-xs text-neutral-400">
-              배너 광고를 원하시면 클릭하세요
+              중기나라 광고로 매출을 늘려보세요
+              <br /> mail: contact@silmaril.io
             </p>
           </div>
         </CardSpotlight>
@@ -88,7 +90,7 @@ export function BannerAside() {
             target={ad.link_url ? "_blank" : undefined}
             rel={ad.link_url ? "noopener noreferrer" : undefined}
           >
-            <div className="flex h-[120px] items-center justify-center overflow-hidden border border-neutral-200 shadow-sm transition-opacity group-hover:opacity-90 dark:border-neutral-800">
+            <div className="flex h-30 items-center justify-center overflow-hidden border border-neutral-200 shadow-sm transition-opacity group-hover:opacity-90 dark:border-neutral-800">
               {ad.banner_image_url ? (
                 <img
                   src={ad.banner_image_url}

@@ -64,7 +64,11 @@ export function ListingDetailContent({
   // 조회수 증가 (일별 + 총합)
   useEffect(() => {
     const supabase = createClient();
-    supabase.rpc("increment_listing_views", { p_listing_id: listing.id });
+    supabase
+      .rpc("increment_listing_views", { p_listing_id: listing.id })
+      .then(({ error }) => {
+        if (error) console.error("조회수 증가 실패:", error.message);
+      });
   }, [listing.id]);
 
   const images = listing.photos;

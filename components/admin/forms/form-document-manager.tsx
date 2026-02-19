@@ -36,6 +36,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { FormDocumentDialog } from "./form-document-dialog";
 import type { Tables } from "@/lib/supabase/database.types";
 
@@ -75,6 +85,7 @@ export function FormDocumentManager() {
   const [page, setPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingDoc, setEditingDoc] = useState<FormDocument | null>(null);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   const fetchDocuments = useCallback(async () => {
     try {
@@ -121,9 +132,10 @@ export function FormDocumentManager() {
     fetchDocuments();
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm("정말 삭제하시겠습니까?")) return;
-    await fetch(`/api/admin/forms?id=${id}`, { method: "DELETE" });
+  async function handleDeleteConfirm() {
+    if (!deleteTargetId) return;
+    await fetch(`/api/admin/forms?id=${deleteTargetId}`, { method: "DELETE" });
+    setDeleteTargetId(null);
     fetchDocuments();
   }
 
@@ -300,7 +312,7 @@ export function FormDocumentManager() {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         className="cursor-pointer text-red-600"
-                        onClick={() => handleDelete(doc.id)}
+                        onClick={() => setDeleteTargetId(doc.id)}
                       >
                         <Trash2 className="mr-2 size-4" />
                         삭제
@@ -370,6 +382,30 @@ export function FormDocumentManager() {
         onClose={handleDialogClose}
         editingDoc={editingDoc}
       />
+
+      {/* 삭제 확인 다이얼로그 */}
+      <AlertDialog
+        open={!!deleteTargetId}
+        onOpenChange={(open) => !open && setDeleteTargetId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>양식 삭제</AlertDialogTitle>
+            <AlertDialogDescription>
+              정말 삭제하시겠습니까?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="cursor-pointer">취소</AlertDialogCancel>
+            <AlertDialogAction
+              className="cursor-pointer bg-red-600 hover:bg-red-700"
+              onClick={handleDeleteConfirm}
+            >
+              삭제
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

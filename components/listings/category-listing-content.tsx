@@ -80,11 +80,11 @@ function getTitle(row: ListingRow): string {
 
 // ─── Component ───────────────────────────────────────
 export function CategoryListingContent({
-  categorySlug,
-  categoryValues,
+  categoryLabel,
+  subcategoryLabel,
 }: {
-  categorySlug: string;
-  categoryValues: string[];
+  categoryLabel: string;
+  subcategoryLabel?: string;
 }) {
   const [sort, setSort] = useState<SortOption>("latest");
   const [currentPage, setCurrentPage] = useState(1);
@@ -102,10 +102,11 @@ export function CategoryListingContent({
           "id, type, year, month, category, condition, manufacturer, model, price, region, usage_amount, usage_unit, photos, listing_type, created_at, company_name"
         )
         .eq("status", "active")
+        .eq("category", categoryLabel)
         .order("created_at", { ascending: false });
 
-      if (categoryValues.length > 0) {
-        query = query.in("category", categoryValues);
+      if (subcategoryLabel) {
+        query = query.eq("subcategory", subcategoryLabel);
       }
 
       const { data } = await query;
@@ -114,8 +115,7 @@ export function CategoryListingContent({
     }
 
     fetchListings();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [categorySlug, categoryValues.join(",")]);
+  }, [categoryLabel, subcategoryLabel]);
 
   const vipListings = listings.filter((item) => item.listing_type === "유료");
   const regularListings = listings.filter((item) => item.listing_type !== "유료");

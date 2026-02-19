@@ -18,7 +18,7 @@ export function TermsContent() {
           이용약관
         </h1>
         <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
-          시행일자: 2024년 1월 1일 | 최종 수정일: 2024년 12월 1일
+          시행일자: 2026년 2월 20일 | 최종 수정일: 2026년 2월 20일
         </p>
       </section>
 
@@ -30,10 +30,11 @@ export function TermsContent() {
           {/* 제1조 */}
           <Article title="제1조 (목적)">
             <p className={paragraph}>
-              이 약관은 중기나라 (주) (이하 &quot;회사&quot;)가 운영하는 인터넷
-              사이트 &quot;중기나라&quot; (이하 &quot;사이트&quot;)에서 제공하는
-              온라인 서비스(이하 &quot;서비스&quot;)를 이용함에 있어 회사와
-              이용자의 권리·의무 및 책임사항을 규정함을 목적으로 합니다.
+              이 약관은 실마릴테크놀로지스 주식회사 (이하 &quot;회사&quot;)가
+              운영하는 인터넷 사이트 &quot;중기나라&quot; (이하
+              &quot;사이트&quot;)에서 제공하는 온라인 서비스(이하
+              &quot;서비스&quot;)를 이용함에 있어 회사와 이용자의 권리·의무 및
+              책임사항을 규정함을 목적으로 합니다.
             </p>
           </Article>
 
@@ -427,7 +428,7 @@ export function TermsContent() {
           {/* 부칙 */}
           <Article title="부칙">
             <p className={paragraph}>
-              이 약관은 2024년 1월 1일부터 시행합니다.
+              이 약관은 2026년 2월 20일부터 시행합니다.
             </p>
           </Article>
         </div>

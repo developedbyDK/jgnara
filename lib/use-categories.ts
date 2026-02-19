@@ -68,19 +68,6 @@ export function useCategories() {
   return { rows, heavyTree, freightTree, allTree, loading };
 }
 
-/** 카테고리 옵션 목록 (매물등록 폼용) - 부모 카테고리의 category_values 기반 */
-export function useCategoryOptions() {
-  const { rows, loading } = useCategories();
-
-  const options = rows
-    .filter((r) => !r.parent_id && r.category_values.length > 0)
-    .flatMap((r) =>
-      r.category_values.map((v) => ({ value: v, label: v }))
-    );
-
-  return { options, loading };
-}
-
 /** 분류1(부모) / 분류2(자식) 계층형 옵션 (매물등록 폼용) */
 export function useHierarchicalCategories() {
   const { rows, loading } = useCategories();
@@ -104,5 +91,20 @@ export function useHierarchicalCategories() {
     return rows.find((r) => r.id === id)?.label ?? "";
   }
 
-  return { parentOptions, getChildOptions, getLabelById, loading };
+  // label → id 역매핑 (수정 폼에서 DB label을 Select value로 변환)
+  function getIdByLabel(label: string) {
+    return rows.find((r) => r.label === label)?.id ?? "";
+  }
+
+  // id → category_group 조회
+  function getGroupById(id: string) {
+    return rows.find((r) => r.id === id)?.category_group ?? "";
+  }
+
+  // id → parent_id 조회
+  function getParentId(id: string) {
+    return rows.find((r) => r.id === id)?.parent_id ?? null;
+  }
+
+  return { parentOptions, getChildOptions, getLabelById, getIdByLabel, getGroupById, getParentId, loading };
 }

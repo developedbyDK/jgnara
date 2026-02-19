@@ -18,17 +18,17 @@ export function CookiesContent() {
           쿠키정책
         </h1>
         <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
-          시행일자: 2024년 1월 1일 | 최종 수정일: 2024년 12월 1일
+          시행일자: 2026년 2월 20일 | 최종 수정일: 2026년 2월 20일
         </p>
       </section>
 
       <div className="border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
         <div className="border-b border-neutral-200 px-5 py-3 dark:border-neutral-800">
           <p className={paragraph}>
-            중기나라 (주) (이하 &quot;회사&quot;)는 이용자에게 더 나은 서비스를
-            제공하기 위해 쿠키(Cookie)를 사용합니다. 본 쿠키정책은 회사가 쿠키를
-            어떻게, 왜 사용하는지, 이용자가 쿠키를 어떻게 관리할 수 있는지에
-            대해 설명합니다.
+            실마릴테크놀로지스 주식회사 (이하 &quot;회사&quot;)는 이용자에게 더
+            나은 서비스를 제공하기 위해 쿠키(Cookie)를 사용합니다. 본 쿠키정책은
+            회사가 쿠키를 어떻게, 왜 사용하는지, 이용자가 쿠키를 어떻게 관리할
+            수 있는지에 대해 설명합니다.
           </p>
         </div>
 
@@ -348,7 +348,7 @@ function InfoRow({
 }) {
   return (
     <div className="flex flex-col gap-0.5 px-4 py-2.5 sm:flex-row sm:items-center sm:gap-3">
-      <span className="w-28 flex-shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400">
+      <span className="w-28 shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400">
         {label}
       </span>
       {href ? (

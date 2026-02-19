@@ -7,12 +7,16 @@ interface PhotoUploadSlotProps {
   label: string
   file: File | null
   onFileChange: (file: File | null) => void
+  existingUrl?: string | null
+  onRemoveExisting?: () => void
 }
 
 export function PhotoUploadSlot({
   label,
   file,
   onFileChange,
+  existingUrl,
+  onRemoveExisting,
 }: PhotoUploadSlotProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [preview, setPreview] = useState<string | null>(null)
@@ -27,6 +31,9 @@ export function PhotoUploadSlot({
     return () => URL.revokeObjectURL(url)
   }, [file])
 
+  const displayUrl = preview ?? existingUrl ?? null
+  const hasImage = !!file || !!existingUrl
+
   return (
     <div className="relative flex flex-col items-center gap-1">
       <button
@@ -34,9 +41,9 @@ export function PhotoUploadSlot({
         onClick={() => inputRef.current?.click()}
         className="border-input hover:border-ring relative flex size-24 cursor-pointer items-center justify-center overflow-hidden border bg-muted/30 transition-colors"
       >
-        {preview ? (
+        {displayUrl ? (
           <img
-            src={preview}
+            src={displayUrl}
             alt={label}
             className="size-full object-cover"
           />
@@ -56,10 +63,16 @@ export function PhotoUploadSlot({
         }}
       />
       <span className="text-muted-foreground text-xs">{label}</span>
-      {file && (
+      {hasImage && (
         <button
           type="button"
-          onClick={() => onFileChange(null)}
+          onClick={() => {
+            if (file) {
+              onFileChange(null)
+            } else if (existingUrl && onRemoveExisting) {
+              onRemoveExisting()
+            }
+          }}
           className="bg-black/70 absolute -top-1 -right-1 flex size-4 cursor-pointer items-center justify-center rounded-full text-white"
         >
           <XIcon className="size-3" />

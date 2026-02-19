@@ -24,7 +24,14 @@ export function Footer() {
                 {" | "}통신판매업: 제2026-서울강남-00538호
               </p>
               <p>
-                이메일{" "}
+                대표번호{" "}
+                <Link
+                  href="tel:070-7737-5000"
+                  className="cursor-pointer font-medium text-neutral-700 underline dark:text-neutral-300"
+                >
+                  070-7737-5000
+                </Link>
+                {" | "}이메일{" "}
                 <Link
                   href="mailto:contact@silmaril.io"
                   className="cursor-pointer font-medium text-neutral-700 underline dark:text-neutral-300"

@@ -18,17 +18,17 @@ export function PrivacyContent() {
           개인정보처리방침
         </h1>
         <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
-          시행일자: 2024년 1월 1일 | 최종 수정일: 2024년 12월 1일
+          시행일자: 2026년 2월 20일 | 최종 수정일: 2026년 2월 20일
         </p>
       </section>
 
       <div className="border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
         <div className="border-b border-neutral-200 px-5 py-3 dark:border-neutral-800">
           <p className={paragraph}>
-            중기나라 (주) (이하 &quot;회사&quot;)는 「개인정보 보호법」 제30조에
-            따라 정보주체의 개인정보를 보호하고 이와 관련한 고충을 신속하고
-            원활하게 처리할 수 있도록 하기 위하여 다음과 같이 개인정보처리방침을
-            수립·공개합니다.
+            실마릴테크놀로지스 주식회사 (이하 &quot;회사&quot;)는 「개인정보
+            보호법」 제30조에 따라 정보주체의 개인정보를 보호하고 이와 관련한
+            고충을 신속하고 원활하게 처리할 수 있도록 하기 위하여 다음과 같이
+            개인정보처리방침을 수립·공개합니다.
           </p>
         </div>
 
@@ -399,10 +399,10 @@ export function PrivacyContent() {
             </p>
             <div className="mt-4 border border-neutral-200 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800/50">
               <div className="divide-y divide-neutral-200 dark:divide-neutral-700">
-                <InfoRow label="직책" value="대표이사" />
-                <InfoRow label="성명" value="홍길동" />
+                <InfoRow label="직책" value="대리" />
+                <InfoRow label="성명" value="최민아" />
                 <InfoRow label="연락처" value="070-7737-5000" />
-                <InfoRow label="이메일" value="privacy@hsheavy.co.kr" />
+                <InfoRow label="이메일" value="contact@silmaril.io" />
               </div>
             </div>
           </Article>
@@ -439,11 +439,11 @@ export function PrivacyContent() {
           {/* 제12조 */}
           <Article title="제12조 (개인정보처리방침 변경)">
             <p className={paragraph}>
-              이 개인정보처리방침은 2024년 1월 1일부터 적용됩니다. 이전의
+              이 개인정보처리방침은 2026년 2월 20일부터 적용됩니다. 이전의
               개인정보처리방침은 아래에서 확인하실 수 있습니다.
             </p>
             <ul className="mt-3 list-inside list-disc space-y-1">
-              <li className={listItem}>2024년 1월 1일 ~ 현재 적용 (현행)</li>
+              <li className={listItem}>2026년 2월 20일 ~ 현재 적용 (현행)</li>
             </ul>
           </Article>
         </div>
@@ -471,7 +471,7 @@ function Article({
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-0.5 px-4 py-2.5 sm:flex-row sm:items-center sm:gap-3">
-      <span className="w-44 flex-shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400">
+      <span className="w-44 shrink-0 text-sm font-medium text-neutral-500 dark:text-neutral-400">
         {label}
       </span>
       <span className="text-sm text-neutral-900 dark:text-neutral-100">

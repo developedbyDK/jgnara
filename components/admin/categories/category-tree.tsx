@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useTransition } from "react";
+import { toast } from "sonner";
 import {
   ChevronRight,
   ChevronDown,
@@ -12,7 +13,6 @@ import {
   Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   AlertDialog,
@@ -93,12 +93,6 @@ function CategoryNode({
         <FolderTree className="size-4 text-muted-foreground" />
 
         <span className="flex-1 text-sm font-medium">{category.label}</span>
-
-        {category.category_values.length > 0 && (
-          <Badge variant="outline" className="text-[10px]">
-            {category.category_values.join(", ")}
-          </Badge>
-        )}
 
         <code className="hidden font-mono text-[10px] text-muted-foreground sm:block">
           {category.slug}
@@ -291,7 +285,7 @@ export function CategoryTree({
       try {
         await deleteCategory(deleteTarget.id);
       } catch {
-        alert("삭제 실패");
+        toast.error("삭제에 실패했습니다.");
       }
       setDeleteTarget(null);
     });

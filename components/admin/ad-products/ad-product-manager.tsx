@@ -28,6 +28,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { AdProductDialog, type AdProduct } from "./ad-product-dialog";
 
 const ICON_LABELS: Record<string, string> = {
@@ -54,6 +64,7 @@ export function AdProductManager() {
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<AdProduct | null>(null);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -90,10 +101,10 @@ export function AdProductManager() {
     fetchProducts();
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm("정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."))
-      return;
-    await fetch(`/api/admin/ad-products?id=${id}`, { method: "DELETE" });
+  async function handleDeleteConfirm() {
+    if (!deleteTargetId) return;
+    await fetch(`/api/admin/ad-products?id=${deleteTargetId}`, { method: "DELETE" });
+    setDeleteTargetId(null);
     fetchProducts();
   }
 
@@ -268,7 +279,7 @@ export function AdProductManager() {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         className="cursor-pointer text-red-600"
-                        onClick={() => handleDelete(product.id)}
+                        onClick={() => setDeleteTargetId(product.id)}
                       >
                         <Trash2 className="mr-2 size-4" />
                         삭제
@@ -300,6 +311,30 @@ export function AdProductManager() {
         onClose={handleDialogClose}
         editingProduct={editingProduct}
       />
+
+      {/* 삭제 확인 다이얼로그 */}
+      <AlertDialog
+        open={!!deleteTargetId}
+        onOpenChange={(open) => !open && setDeleteTargetId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>광고 상품 삭제</AlertDialogTitle>
+            <AlertDialogDescription>
+              정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="cursor-pointer">취소</AlertDialogCancel>
+            <AlertDialogAction
+              className="cursor-pointer bg-red-600 hover:bg-red-700"
+              onClick={handleDeleteConfirm}
+            >
+              삭제
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

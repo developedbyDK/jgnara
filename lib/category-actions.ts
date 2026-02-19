@@ -9,7 +9,6 @@ export async function createCategory(formData: {
   parentId: string | null;
   categoryGroup: "heavy" | "freight";
   iconKey?: string;
-  categoryValues?: string[];
 }) {
   const supabase = await createClient();
 
@@ -37,7 +36,6 @@ export async function createCategory(formData: {
     sort_order: nextOrder,
     category_group: formData.categoryGroup,
     icon_key: formData.iconKey || null,
-    category_values: formData.categoryValues ?? [],
   });
 
   if (error) throw error;
@@ -53,7 +51,6 @@ export async function updateCategory(
     slug?: string;
     sortOrder?: number;
     iconKey?: string;
-    categoryValues?: string[];
   }
 ) {
   const supabase = await createClient();
@@ -63,7 +60,6 @@ export async function updateCategory(
   if (data.slug !== undefined) updateData.slug = data.slug;
   if (data.sortOrder !== undefined) updateData.sort_order = data.sortOrder;
   if (data.iconKey !== undefined) updateData.icon_key = data.iconKey;
-  if (data.categoryValues !== undefined) updateData.category_values = data.categoryValues;
 
   const { error } = await supabase
     .from("categories")
