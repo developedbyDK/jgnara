@@ -30,11 +30,10 @@ export function TermsContent() {
           {/* 제1조 */}
           <Article title="제1조 (목적)">
             <p className={paragraph}>
-              이 약관은 중기나라 (주) (이하 &quot;회사&quot;)가 운영하는
-              인터넷 사이트 &quot;중기나라&quot; (이하 &quot;사이트&quot;)에서
-              제공하는 온라인 서비스(이하 &quot;서비스&quot;)를 이용함에 있어
-              회사와 이용자의 권리·의무 및 책임사항을 규정함을 목적으로
-              합니다.
+              이 약관은 중기나라 (주) (이하 &quot;회사&quot;)가 운영하는 인터넷
+              사이트 &quot;중기나라&quot; (이하 &quot;사이트&quot;)에서 제공하는
+              온라인 서비스(이하 &quot;서비스&quot;)를 이용함에 있어 회사와
+              이용자의 권리·의무 및 책임사항을 규정함을 목적으로 합니다.
             </p>
           </Article>
 
@@ -43,9 +42,9 @@ export function TermsContent() {
             <ol className="list-inside list-decimal space-y-2">
               <li className={listItem}>
                 <strong>&quot;사이트&quot;</strong>란 회사가 건설장비 매매 정보,
-                업체 정보, 구인·구직 정보 등 서비스를 이용자에게 제공하기
-                위하여 컴퓨터 등 정보통신설비를 이용하여 설정한 가상의
-                영업장을 말합니다.
+                업체 정보, 구인·구직 정보 등 서비스를 이용자에게 제공하기 위하여
+                컴퓨터 등 정보통신설비를 이용하여 설정한 가상의 영업장을
+                말합니다.
               </li>
               <li className={listItem}>
                 <strong>&quot;이용자&quot;</strong>란 사이트에 접속하여 이
@@ -79,8 +78,8 @@ export function TermsContent() {
           <Article title="제3조 (약관의 게시와 개정)">
             <ol className="list-inside list-decimal space-y-2">
               <li className={listItem}>
-                회사는 이 약관의 내용을 이용자가 쉽게 알 수 있도록 서비스
-                초기 화면에 게시합니다.
+                회사는 이 약관의 내용을 이용자가 쉽게 알 수 있도록 서비스 초기
+                화면에 게시합니다.
               </li>
               <li className={listItem}>
                 회사는 「약관의 규제에 관한 법률」, 「정보통신망 이용촉진 및
@@ -91,8 +90,8 @@ export function TermsContent() {
                 회사가 약관을 개정할 경우에는 적용일자 및 개정사유를 명시하여
                 현행약관과 함께 사이트의 초기화면에 그 적용일자 7일 이전부터
                 적용일자 전일까지 공지합니다. 다만, 이용자에게 불리하게 약관
-                내용을 변경하는 경우에는 최소한 30일 이상의 사전 유예기간을
-                두고 공지합니다.
+                내용을 변경하는 경우에는 최소한 30일 이상의 사전 유예기간을 두고
+                공지합니다.
               </li>
               <li className={listItem}>
                 회원이 개정약관의 적용에 동의하지 않는 경우 회원은 이용계약을
@@ -106,8 +105,8 @@ export function TermsContent() {
             <p className={paragraph}>
               이 약관에서 정하지 아니한 사항과 이 약관의 해석에 관하여는
               「전자상거래 등에서의 소비자보호에 관한 법률」, 「약관의 규제에
-              관한 법률」, 「정보통신망 이용촉진 및 정보보호 등에 관한 법률」
-              등 관련 법령에 따릅니다.
+              관한 법률」, 「정보통신망 이용촉진 및 정보보호 등에 관한 법률」 등
+              관련 법령에 따릅니다.
             </p>
           </Article>
 
@@ -170,8 +169,8 @@ export function TermsContent() {
                 회원탈퇴를 처리합니다.
               </li>
               <li className={listItem}>
-                회원이 다음 각 호의 사유에 해당하는 경우, 회사는 회원자격을
-                제한 및 정지시킬 수 있습니다.
+                회원이 다음 각 호의 사유에 해당하는 경우, 회사는 회원자격을 제한
+                및 정지시킬 수 있습니다.
                 <ul className="mt-1.5 ml-5 list-inside list-disc space-y-1">
                   <li className={listItem}>
                     가입 신청 시에 허위 내용을 등록한 경우
@@ -202,13 +201,19 @@ export function TermsContent() {
               <li className={listItem}>
                 회사는 다음과 같은 서비스를 제공합니다.
                 <ul className="mt-1.5 ml-5 list-inside list-disc space-y-1">
-                  <li className={listItem}>건설장비 매물 등록 및 조회 서비스</li>
+                  <li className={listItem}>
+                    건설장비 매물 등록 및 조회 서비스
+                  </li>
                   <li className={listItem}>업체 등록 및 검색 서비스</li>
                   <li className={listItem}>구인·구직 정보 제공 서비스</li>
-                  <li className={listItem}>게시판(자유게시판, 매매게시판 등) 서비스</li>
+                  <li className={listItem}>
+                    게시판(자유게시판, 매매게시판 등) 서비스
+                  </li>
                   <li className={listItem}>주요양식 제공 서비스</li>
                   <li className={listItem}>VIP 프리미엄 매물 서비스</li>
-                  <li className={listItem}>기타 회사가 추가 개발하거나 제휴를 통해 제공하는 서비스</li>
+                  <li className={listItem}>
+                    기타 회사가 추가 개발하거나 제휴를 통해 제공하는 서비스
+                  </li>
                 </ul>
               </li>
               <li className={listItem}>
@@ -228,8 +233,8 @@ export function TermsContent() {
               </li>
               <li className={listItem}>
                 회사는 제1항의 사유로 서비스의 제공이 일시적으로 중단됨으로
-                인하여 이용자 또는 제3자가 입은 손해에 대하여 배상합니다.
-                단, 회사가 고의 또는 과실이 없음을 입증하는 경우에는 그러하지
+                인하여 이용자 또는 제3자가 입은 손해에 대하여 배상합니다. 단,
+                회사가 고의 또는 과실이 없음을 입증하는 경우에는 그러하지
                 아니합니다.
               </li>
               <li className={listItem}>
@@ -252,18 +257,26 @@ export function TermsContent() {
               <li className={listItem}>
                 회사는 전항에 따른 권리자의 요청이 없는 경우라도 권리침해가
                 인정될 만한 사유가 있거나 기타 회사 정책 및 관련 법에 위반되는
-                경우에는 관련 법에 따라 해당 게시물에 대해 임시조치 등을 취할
-                수 있습니다.
+                경우에는 관련 법에 따라 해당 게시물에 대해 임시조치 등을 취할 수
+                있습니다.
               </li>
               <li className={listItem}>
                 다음 각 호에 해당하는 게시물은 사전 통지 없이 삭제될 수
                 있습니다.
                 <ul className="mt-1.5 ml-5 list-inside list-disc space-y-1">
                   <li className={listItem}>허위 매물 또는 사기성 게시물</li>
-                  <li className={listItem}>타인의 명예를 훼손하거나 불이익을 주는 게시물</li>
-                  <li className={listItem}>음란물 또는 공서양속에 반하는 게시물</li>
-                  <li className={listItem}>영리 목적의 광고성 게시물 (허가되지 않은 경우)</li>
-                  <li className={listItem}>범죄와 관련이 있다고 판단되는 게시물</li>
+                  <li className={listItem}>
+                    타인의 명예를 훼손하거나 불이익을 주는 게시물
+                  </li>
+                  <li className={listItem}>
+                    음란물 또는 공서양속에 반하는 게시물
+                  </li>
+                  <li className={listItem}>
+                    영리 목적의 광고성 게시물 (허가되지 않은 경우)
+                  </li>
+                  <li className={listItem}>
+                    범죄와 관련이 있다고 판단되는 게시물
+                  </li>
                   <li className={listItem}>기타 관련 법령에 위반되는 게시물</li>
                 </ul>
               </li>
@@ -277,8 +290,8 @@ export function TermsContent() {
           <Article title="제11조 (회사의 의무)">
             <ol className="list-inside list-decimal space-y-2">
               <li className={listItem}>
-                회사는 법령과 이 약관이 금지하거나 공서양속에 반하는 행위를
-                하지 않으며 이 약관이 정하는 바에 따라 지속적이고, 안정적으로
+                회사는 법령과 이 약관이 금지하거나 공서양속에 반하는 행위를 하지
+                않으며 이 약관이 정하는 바에 따라 지속적이고, 안정적으로
                 서비스를 제공하는 데 최선을 다하여야 합니다.
               </li>
               <li className={listItem}>
@@ -295,16 +308,16 @@ export function TermsContent() {
 
           {/* 제12조 */}
           <Article title="제12조 (이용자의 의무)">
-            <p className={paragraph}>이용자는 다음 행위를 하여서는 안 됩니다.</p>
+            <p className={paragraph}>
+              이용자는 다음 행위를 하여서는 안 됩니다.
+            </p>
             <ol className="mt-2 list-inside list-decimal space-y-2">
               <li className={listItem}>신청 또는 변경 시 허위 내용의 등록</li>
               <li className={listItem}>타인의 정보 도용</li>
+              <li className={listItem}>회사가 게시한 정보의 변경</li>
               <li className={listItem}>
-                회사가 게시한 정보의 변경
-              </li>
-              <li className={listItem}>
-                회사가 정한 정보 이외의 정보(컴퓨터 프로그램 등) 등의 송신
-                또는 게시
+                회사가 정한 정보 이외의 정보(컴퓨터 프로그램 등) 등의 송신 또는
+                게시
               </li>
               <li className={listItem}>
                 회사와 기타 제3자의 저작권 등 지적재산권에 대한 침해
@@ -322,9 +335,7 @@ export function TermsContent() {
               <li className={listItem}>
                 회사의 동의 없이 영리를 목적으로 서비스를 이용하는 행위
               </li>
-              <li className={listItem}>
-                기타 불법적이거나 부당한 행위
-              </li>
+              <li className={listItem}>기타 불법적이거나 부당한 행위</li>
             </ol>
           </Article>
 
@@ -400,10 +411,10 @@ export function TermsContent() {
                 피해를 보상처리하기 위하여 피해보상처리기구를 설치·운영합니다.
               </li>
               <li className={listItem}>
-                회사와 이용자 간에 발생한 전자상거래 분쟁에 관한 소송은
-                제소 당시의 이용자의 주소에 의하고, 주소가 없는 경우에는
-                거소를 관할하는 지방법원의 전속관할로 합니다. 다만, 제소 당시
-                이용자의 주소 또는 거소가 분명하지 않거나 외국 거주자의 경우에는
+                회사와 이용자 간에 발생한 전자상거래 분쟁에 관한 소송은 제소
+                당시의 이용자의 주소에 의하고, 주소가 없는 경우에는 거소를
+                관할하는 지방법원의 전속관할로 합니다. 다만, 제소 당시 이용자의
+                주소 또는 거소가 분명하지 않거나 외국 거주자의 경우에는
                 민사소송법상의 관할법원에 제기합니다.
               </li>
               <li className={listItem}>

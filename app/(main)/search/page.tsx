@@ -37,7 +37,8 @@ export default async function SearchPage({
           <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100">
             {q ? (
               <>
-                <span className="text-orange-600">&ldquo;{q}&rdquo;</span> 검색결과
+                <span className="text-orange-600">&ldquo;{q}&rdquo;</span>{" "}
+                검색결과
               </>
             ) : (
               "전체 매물"

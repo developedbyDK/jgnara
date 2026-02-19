@@ -27,8 +27,8 @@ export function PrivacyContent() {
           <p className={paragraph}>
             중기나라 (주) (이하 &quot;회사&quot;)는 「개인정보 보호법」 제30조에
             따라 정보주체의 개인정보를 보호하고 이와 관련한 고충을 신속하고
-            원활하게 처리할 수 있도록 하기 위하여 다음과 같이
-            개인정보처리방침을 수립·공개합니다.
+            원활하게 처리할 수 있도록 하기 위하여 다음과 같이 개인정보처리방침을
+            수립·공개합니다.
           </p>
         </div>
 
@@ -161,7 +161,9 @@ export function PrivacyContent() {
 
           {/* 제3조 */}
           <Article title="제3조 (처리하는 개인정보의 항목)">
-            <p className={paragraph}>회사는 다음의 개인정보 항목을 처리하고 있습니다.</p>
+            <p className={paragraph}>
+              회사는 다음의 개인정보 항목을 처리하고 있습니다.
+            </p>
             <div className="mt-3 space-y-4">
               <div>
                 <h4 className="text-sm font-semibold text-neutral-800 dark:text-neutral-200">
@@ -177,9 +179,7 @@ export function PrivacyContent() {
                   <li className={listItem}>
                     업체등록: 업체명, 대표자명, 사업자등록번호, 연락처, 주소
                   </li>
-                  <li className={listItem}>
-                    구인/구직: 이름, 연락처, 이메일
-                  </li>
+                  <li className={listItem}>구인/구직: 이름, 연락처, 이메일</li>
                 </ul>
               </div>
               <div>
@@ -187,7 +187,9 @@ export function PrivacyContent() {
                   2. 선택항목
                 </h4>
                 <ul className="mt-1.5 list-inside list-disc space-y-1">
-                  <li className={listItem}>프로필 사진, 자기소개, 관심 장비 카테고리</li>
+                  <li className={listItem}>
+                    프로필 사진, 자기소개, 관심 장비 카테고리
+                  </li>
                 </ul>
               </div>
               <div>
@@ -208,8 +210,8 @@ export function PrivacyContent() {
           <Article title="제4조 (개인정보의 제3자 제공)">
             <p className={paragraph}>
               회사는 정보주체의 개인정보를 제1조(개인정보의 처리 목적)에서
-              명시한 범위 내에서만 처리하며, 정보주체의 동의, 법률의 특별한
-              규정 등 「개인정보 보호법」 제17조 및 제18조에 해당하는 경우에만
+              명시한 범위 내에서만 처리하며, 정보주체의 동의, 법률의 특별한 규정
+              등 「개인정보 보호법」 제17조 및 제18조에 해당하는 경우에만
               개인정보를 제3자에게 제공합니다.
             </p>
             <div className="mt-4 overflow-x-auto">
@@ -399,7 +401,7 @@ export function PrivacyContent() {
               <div className="divide-y divide-neutral-200 dark:divide-neutral-700">
                 <InfoRow label="직책" value="대표이사" />
                 <InfoRow label="성명" value="홍길동" />
-                <InfoRow label="연락처" value="1588-0000" />
+                <InfoRow label="연락처" value="070-7737-5000" />
                 <InfoRow label="이메일" value="privacy@hsheavy.co.kr" />
               </div>
             </div>

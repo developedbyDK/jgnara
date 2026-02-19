@@ -2,12 +2,10 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { CategorySidebar } from "@/components/layout/category-sidebar";
 import { BannerAside } from "@/components/layout/banner-aside";
-import { getCategoryBySlug, CATEGORIES } from "@/lib/constants/categories";
+import { fetchCategoryBySlug, fetchCategories } from "@/lib/category-queries";
 import { CategoryListingContent } from "@/components/listings/category-listing-content";
 
-export function generateStaticParams() {
-  return CATEGORIES.map((cat) => ({ slug: cat.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -15,7 +13,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const category = getCategoryBySlug(slug);
+  const category = await fetchCategoryBySlug(slug);
   if (!category) return {};
   return {
     title: `${category.label} - 중기나라`,
@@ -29,11 +27,19 @@ export default async function CategoryPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const category = getCategoryBySlug(slug);
+  const category = await fetchCategoryBySlug(slug);
 
   if (!category) {
     notFound();
   }
+
+  // 하위 카테고리 조회
+  const allRows = await fetchCategories();
+  const subcategories = allRows
+    .filter((r) => r.parent_id === category.id)
+    .sort((a, b) => a.sort_order - b.sort_order);
+
+  const categoryHref = `/category/${category.slug}`;
 
   return (
     <CategorySidebar aside={<BannerAside />}>
@@ -65,15 +71,15 @@ export default async function CategoryPage({
         {/* Subcategory Chips */}
         <div className="mt-4 flex flex-wrap gap-2">
           <Link
-            href={category.href}
+            href={categoryHref}
             className="cursor-pointer border border-neutral-900 bg-neutral-900 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-neutral-800 dark:border-neutral-100 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-200"
           >
             전체
           </Link>
-          {category.subcategories.map((sub) => (
+          {subcategories.map((sub) => (
             <Link
-              key={sub.href}
-              href={sub.href}
+              key={sub.id}
+              href={`/category/${slug}/${sub.slug}`}
               className="cursor-pointer border border-neutral-300 bg-white px-3 py-1.5 text-sm text-neutral-700 transition hover:border-neutral-900 hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:border-neutral-400"
             >
               {sub.label}
@@ -82,7 +88,10 @@ export default async function CategoryPage({
         </div>
 
         {/* Listing Content (Client Component) */}
-        <CategoryListingContent categorySlug={slug} />
+        <CategoryListingContent
+          categorySlug={slug}
+          categoryValues={category.category_values}
+        />
       </div>
     </CategorySidebar>
   );

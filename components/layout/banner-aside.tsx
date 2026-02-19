@@ -3,78 +3,103 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
+import { CardSpotlight } from "@/components/ui/card-spotlight";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const banners = [
-  {
-    id: 1,
-    label: "광고 배너",
-    href: "#",
-    bgColor: "bg-orange-500",
-  },
-  {
-    id: 2,
-    label: "광고 배너",
-    href: "#",
-    bgColor: "bg-blue-500",
-  },
-  {
-    id: 3,
-    label: "광고 배너",
-    href: "#",
-    bgColor: "bg-emerald-500",
-  },
-  {
-    id: 4,
-    label: "광고 배너",
-    href: "#",
-    bgColor: "bg-rose-500",
-  },
-  {
-    id: 5,
-    label: "광고 배너",
-    href: "#",
-    bgColor: "bg-purple-500",
-  },
-];
+type ActiveAd = {
+  id: string;
+  banner_image_url: string | null;
+  link_url: string | null;
+  ad_products: { name: string; slug: string; ad_zone: string } | null;
+};
 
 export function BannerAside() {
-  const [order, setOrder] = useState(banners);
+  const [ads, setAds] = useState<ActiveAd[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [order, setOrder] = useState<ActiveAd[]>([]);
 
   useEffect(() => {
+    async function fetchAds() {
+      try {
+        const res = await fetch("/api/ads/active?zone=side-banner");
+        if (res.ok) {
+          const data = await res.json();
+          setAds(data);
+          setOrder(data);
+        }
+      } catch {
+        // ignore
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchAds();
+  }, []);
+
+  useEffect(() => {
+    if (order.length <= 1) return;
     const interval = setInterval(() => {
       setOrder((prev) => [...prev.slice(1), prev[0]]);
     }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [order.length]);
+
+  if (loading) {
+    return (
+      <>
+        <Link href="/advertising" className="cursor-pointer">
+          <CardSpotlight className="flex h-[120px] items-center justify-center p-4">
+            <div className="relative z-20 text-center">
+              <p className="text-sm font-bold text-white">광고문의</p>
+              <p className="mt-1 text-xs text-neutral-400">
+                배너 광고를 원하시면 클릭하세요
+              </p>
+            </div>
+          </CardSpotlight>
+        </Link>
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Skeleton key={i} className="h-[120px] w-full" />
+        ))}
+      </>
+    );
+  }
 
   return (
     <>
-      <Link
-        href="/advertising"
-        className="group cursor-pointer"
-      >
-        <div className="flex h-[120px] items-center justify-center border border-neutral-200 bg-white shadow-sm transition-opacity group-hover:opacity-90 dark:border-neutral-800 dark:bg-neutral-900">
-          <span className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">
-            광고문의
-          </span>
-        </div>
+      <Link href="/advertising" className="cursor-pointer">
+        <CardSpotlight className="flex h-[120px] items-center justify-center p-4">
+          <div className="relative z-20 text-center">
+            <p className="text-sm font-bold text-white">광고문의</p>
+            <p className="mt-1 text-xs text-neutral-400">
+              배너 광고를 원하시면 클릭하세요
+            </p>
+          </div>
+        </CardSpotlight>
       </Link>
-      {order.map((banner) => (
+      {order.map((ad) => (
         <motion.div
-          key={banner.id}
+          key={ad.id}
           layout
           transition={{ type: "spring", stiffness: 500, damping: 35 }}
         >
           <Link
-            href={banner.href}
+            href={ad.link_url || "/"}
             className="group cursor-pointer"
+            target={ad.link_url ? "_blank" : undefined}
+            rel={ad.link_url ? "noopener noreferrer" : undefined}
           >
-            <div
-              className={`flex h-[120px] items-center justify-center border border-neutral-200 shadow-sm transition-opacity group-hover:opacity-90 dark:border-neutral-800 ${banner.bgColor}`}
-            >
-              <span className="text-xs font-semibold text-white/90">
-                {banner.label} {banner.id}
-              </span>
+            <div className="flex h-[120px] items-center justify-center overflow-hidden border border-neutral-200 shadow-sm transition-opacity group-hover:opacity-90 dark:border-neutral-800">
+              {ad.banner_image_url ? (
+                <img
+                  src={ad.banner_image_url}
+                  alt={ad.ad_products?.name ?? "광고"}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span className="text-xs font-semibold text-neutral-400">
+                  {ad.ad_products?.name ?? "광고"}
+                </span>
+              )}
             </div>
           </Link>
         </motion.div>

@@ -400,7 +400,7 @@ export function AdvertisingContent() {
             광고 문의 전화
           </p>
           <p className="mt-0.5 text-sm font-bold text-neutral-900 dark:text-neutral-100">
-            1588-0000
+            070-7737-5000
           </p>
         </div>
         <div className="border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
@@ -411,7 +411,7 @@ export function AdvertisingContent() {
             광고 문의 이메일
           </p>
           <p className="mt-0.5 text-sm font-bold text-neutral-900 dark:text-neutral-100">
-            ad@hsheavy.co.kr
+            contact@silmaril.io
           </p>
         </div>
       </section>

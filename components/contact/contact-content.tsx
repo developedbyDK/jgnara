@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { submitContact } from "@/lib/contact-actions";
 
 // ─── Inquiry Types ──────────────────────────────────
 const INQUIRY_TYPES = [
@@ -40,16 +41,24 @@ export function ContactContent() {
   const [inquiryType, setInquiryType] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setErrorMsg("");
 
-    // Simulate submission
-    setTimeout(() => {
-      setIsSubmitting(false);
+    const formData = new FormData(e.currentTarget);
+    formData.set("inquiry_type", inquiryType);
+
+    const result = await submitContact(formData);
+
+    setIsSubmitting(false);
+    if (result.success) {
       setIsSubmitted(true);
-    }, 1000);
+    } else {
+      setErrorMsg(result.message ?? "문의 접수에 실패했습니다.");
+    }
   };
 
   if (isSubmitted) {
@@ -101,19 +110,19 @@ export function ContactContent() {
         <ContactInfoCard
           icon={<IconPhone className="h-5 w-5" />}
           label="대표전화"
-          value="1588-0000"
-          href="tel:1588-0000"
+          value="070-7737-5000"
+          href="tel:070-7737-5000"
         />
         <ContactInfoCard
           icon={<IconMail className="h-5 w-5" />}
           label="이메일"
-          value="info@hsheavy.co.kr"
-          href="mailto:info@hsheavy.co.kr"
+          value="contact@silmaril.io"
+          href="mailto:contact@silmaril.io"
         />
         <ContactInfoCard
           icon={<IconMapPin className="h-5 w-5" />}
           label="주소"
-          value="경기도 화성시 동탄대로 123"
+          value="서울특별시 강남구 테헤란로70길 12"
         />
         <ContactInfoCard
           icon={<IconClock className="h-5 w-5" />}
@@ -247,6 +256,11 @@ export function ContactContent() {
               동의합니다.
             </Label>
           </div>
+
+          {/* Error Message */}
+          {errorMsg && (
+            <p className="text-sm font-medium text-red-600">{errorMsg}</p>
+          )}
 
           {/* Submit */}
           <div className="flex justify-end pt-2">

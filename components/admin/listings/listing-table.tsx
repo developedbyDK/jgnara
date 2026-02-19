@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useTransition } from "react";
 import Link from "next/link";
 import { Search, MoreHorizontal, Eye, CheckCircle, XCircle, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -28,23 +28,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MOCK_ADMIN_LISTINGS, getStatusColor } from "@/lib/constants/mock-admin";
+import { getStatusColor } from "@/lib/constants/mock-admin";
+import { updateListingStatus } from "@/lib/listing-actions";
+import type { AdminListingView } from "@/lib/listing-queries";
 
 const ITEMS_PER_PAGE = 10;
 
-export function ListingTable() {
+interface ListingTableProps {
+  listings: AdminListingView[];
+}
+
+export function ListingTable({ listings }: ListingTableProps) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [page, setPage] = useState(1);
+  const [isPending, startTransition] = useTransition();
 
   const categories = useMemo(
-    () => [...new Set(MOCK_ADMIN_LISTINGS.map((l) => l.category))],
-    []
+    () => [...new Set(listings.map((l) => l.category))],
+    [listings]
   );
 
   const filtered = useMemo(() => {
-    return MOCK_ADMIN_LISTINGS.filter((listing) => {
+    return listings.filter((listing) => {
       const matchSearch =
         !search ||
         listing.title.includes(search) ||
@@ -54,10 +61,16 @@ export function ListingTable() {
       const matchCategory = categoryFilter === "all" || listing.category === categoryFilter;
       return matchSearch && matchStatus && matchCategory;
     });
-  }, [search, statusFilter, categoryFilter]);
+  }, [listings, search, statusFilter, categoryFilter]);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paged = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+
+  function handleAction(id: string, dbStatus: string) {
+    startTransition(async () => {
+      await updateListingStatus(id, dbStatus);
+    });
+  }
 
   return (
     <div className="space-y-4">
@@ -119,7 +132,7 @@ export function ListingTable() {
           <TableBody>
             {paged.map((listing) => (
               <TableRow key={listing.id}>
-                <TableCell className="font-mono text-xs">{listing.id}</TableCell>
+                <TableCell className="font-mono text-xs">{listing.id.slice(0, 8)}</TableCell>
                 <TableCell className="font-medium max-w-[200px] truncate">
                   <Link
                     href={`/hs-ctrl-x7k9m/listings/${listing.id}`}
@@ -149,7 +162,7 @@ export function ListingTable() {
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="size-8 cursor-pointer">
+                      <Button variant="ghost" size="icon" className="size-8 cursor-pointer" disabled={isPending}>
                         <MoreHorizontal className="size-4" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -160,16 +173,29 @@ export function ListingTable() {
                           상세보기
                         </Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer">
-                        <CheckCircle className="mr-2 size-4" />
-                        승인
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer">
-                        <XCircle className="mr-2 size-4" />
-                        반려
-                      </DropdownMenuItem>
+                      {listing.status !== "판매중" && (
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={() => handleAction(listing.id, "active")}
+                        >
+                          <CheckCircle className="mr-2 size-4" />
+                          승인
+                        </DropdownMenuItem>
+                      )}
+                      {listing.status !== "반려" && (
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={() => handleAction(listing.id, "rejected")}
+                        >
+                          <XCircle className="mr-2 size-4" />
+                          반려
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem className="cursor-pointer text-red-600">
+                      <DropdownMenuItem
+                        className="cursor-pointer text-red-600"
+                        onClick={() => handleAction(listing.id, "deleted")}
+                      >
                         <Trash2 className="mr-2 size-4" />
                         삭제
                       </DropdownMenuItem>

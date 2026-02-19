@@ -8,23 +8,30 @@ export function Footer() {
           <div className="mb-10 max-w-xl">
             <Logo />
             <p className="mb-4 text-sm text-neutral-600 dark:text-neutral-400">
-              중장비 매매, 업체찾기, 일감찾기, 구인구직까지. 중기나라에서
-              중장비에 관한 모든 것을 한 곳에서 해결하세요.
+              중장비 매매, 업체찾기, 일감찾기, 구인구직까지.
+              <br /> 중기나라에서 중장비에 관한 모든 것을 한 곳에서 해결하세요.
             </p>
-            <div className="text-sm text-neutral-700 dark:text-neutral-300">
-              대표전화{" "}
-              <span className="font-medium text-neutral-800 dark:text-neutral-400">
-                1588-0000
-              </span>
-            </div>
-            <div className="mt-2 text-sm text-neutral-700 dark:text-neutral-300">
-              이메일{" "}
-              <Link
-                href="mailto:info@hsheavy.co.kr"
-                className="cursor-pointer font-medium text-neutral-800 underline dark:text-neutral-400"
-              >
-                info@hsheavy.co.kr
-              </Link>
+            <div className="space-y-1 text-sm text-neutral-500 dark:text-neutral-400">
+              <p>
+                <span className="text-neutral-600 dark:text-neutral-300">
+                  실마릴테크놀로지스 주식회사
+                </span>
+                {" | "}대표: 김요한
+              </p>
+              <p>서울특별시 강남구 테헤란로70길 12, 402호(대치동, H타워)</p>
+              <p>
+                사업자번호: 532-87-03387
+                {" | "}통신판매업: 제2026-서울강남-00538호
+              </p>
+              <p>
+                이메일{" "}
+                <Link
+                  href="mailto:contact@silmaril.io"
+                  className="cursor-pointer font-medium text-neutral-700 underline dark:text-neutral-300"
+                >
+                  contact@silmaril.io
+                </Link>
+              </p>
             </div>
           </div>
         </div>
@@ -34,7 +41,13 @@ export function Footer() {
           <FooterColumn title="고객지원" items={SUPPORT} />
           <FooterColumn title="법적 고지" items={LEGALS} />
         </div>
-        <p className="mb-4 pt-10 text-sm text-neutral-600 dark:text-neutral-400">
+        <p className="pt-10 text-xs leading-relaxed text-neutral-400 dark:text-neutral-500">
+          중기나라는 중장비 매매를 위한 정보 제공 플랫폼으로, 회원 간 직접
+          거래에 대한 어떠한 책임도 지지 않습니다. 거래 시 매매 대상 장비의
+          상태, 소유권, 가격 등을 반드시 직접 확인하시기 바라며, 모든 거래에
+          따른 책임은 거래 당사자에게 있습니다.
+        </p>
+        <p className="mt-4 mb-4 text-sm text-neutral-600 dark:text-neutral-400">
           &copy; {new Date().getFullYear()} 중기나라. All Rights Reserved.
         </p>
       </div>
@@ -105,7 +118,9 @@ const Logo = () => {
       className="flex cursor-pointer items-center py-6 text-4xl tracking-tight"
       style={{ fontFamily: "'EutmanEungtteong', sans-serif" }}
     >
-      <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-orange-600 text-3xl font-bold text-white">J</span>
+      <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-orange-600 text-3xl font-bold text-white">
+        J
+      </span>
       <span className="ml-1.5 text-orange-500">중기</span>
       <span className="text-orange-600">나라</span>
     </Link>

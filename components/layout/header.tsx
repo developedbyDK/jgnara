@@ -1,14 +1,19 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
 import {
   IconChevronDown,
+  IconCoin,
   IconFlame,
+  IconLogout,
   IconMenu2,
   IconMoon,
   IconSearch,
+  IconSettings,
   IconStar,
   IconSun,
+  IconUser,
   IconX,
 } from "@tabler/icons-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -16,8 +21,17 @@ import { useTheme } from "next-themes";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useSyncExternalStore, useState } from "react";
+import type { User } from "@supabase/supabase-js";
 
 import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type NavChild = {
   name: string;
@@ -38,6 +52,7 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   { name: "매물등록", link: "/listings/register" },
+  { name: "포인트충전", link: "/credits" },
   {
     name: "업체찾기/등록",
     link: "#",
@@ -91,6 +106,11 @@ const navItems: NavItem[] = [
 
 export function Header() {
   const headerRef = React.useRef<HTMLDivElement>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [visitCounts, setVisitCounts] = useState<{
+    today: number;
+    total: number;
+  } | null>(null);
 
   React.useEffect(() => {
     const el = headerRef.current;
@@ -105,6 +125,29 @@ export function Header() {
     const ro = new ResizeObserver(update);
     ro.observe(el);
     return () => ro.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.rpc("record_visit").then(({ data }) => {
+      if (data) setVisitCounts(data as { today: number; total: number });
+    });
   }, []);
 
   return (
@@ -122,11 +165,17 @@ export function Header() {
             </Link>
             <span>|</span>
             <span>
-              오늘 <span className="font-medium text-white">128</span>
+              오늘{" "}
+              <span className="font-medium text-white">
+                {visitCounts ? visitCounts.today.toLocaleString() : "-"}
+              </span>
             </span>
             <span>|</span>
             <span>
-              전체 <span className="font-medium text-white">15,482</span>
+              전체{" "}
+              <span className="font-medium text-white">
+                {visitCounts ? visitCounts.total.toLocaleString() : "-"}
+              </span>
             </span>
           </div>
           <div className="flex items-center gap-3 text-xs text-neutral-400">
@@ -152,40 +201,40 @@ export function Header() {
             >
               광고문의
             </Link>
+            <span>|</span>
+            <Link
+              href="/ad-payment"
+              className="cursor-pointer transition hover:text-white"
+            >
+              광고결제
+            </Link>
           </div>
         </div>
       </div>
       {/* Top bar - 로고 */}
       <div className="border-b border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-950">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-          <Link
-            href="/"
-            className="flex cursor-pointer items-center text-4xl tracking-tight"
-            style={{ fontFamily: "'EutmanEungtteong', sans-serif" }}
-          >
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-orange-600 text-3xl font-bold text-white">J</span>
-            <span className="ml-1.5 text-orange-500">중기</span>
-            <span className="text-orange-600">나라</span>
+          <Link href="/" className="flex cursor-pointer flex-col items-start">
+            <span
+              className="flex items-center text-4xl tracking-tight"
+              style={{ fontFamily: "'EutmanEungtteong', sans-serif" }}
+            >
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-orange-600 text-3xl font-bold text-white">
+                J
+              </span>
+              <span className="ml-1.5 text-orange-500">중기</span>
+              <span className="text-orange-600">나라</span>
+            </span>
+            <span className="text-[17.5px] font-bold tracking-wide text-neutral-900 dark:text-neutral-100">
+              대한민국 NO.1 중기플랫폼
+            </span>
           </Link>
           {/* 검색창 + 인기 매물 */}
           <div className="hidden flex-1 items-center gap-4 px-8 sm:flex">
             <SearchBar />
             <TrendingTicker />
           </div>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/login"
-              className="cursor-pointer rounded-lg px-4 py-2 text-sm font-medium text-neutral-600 transition hover:text-black dark:text-neutral-400 dark:hover:text-white"
-            >
-              로그인
-            </Link>
-            <Link
-              href="/register"
-              className="cursor-pointer rounded-lg bg-orange-600 px-5 py-2 text-sm font-bold text-white transition hover:bg-orange-700 dark:bg-orange-600 dark:text-white dark:hover:bg-orange-700"
-            >
-              회원가입
-            </Link>
-          </div>
+          <UserAuthSection user={user} />
         </div>
       </div>
       {/* Nav bar */}
@@ -232,6 +281,7 @@ const DesktopNav = () => {
             <Link
               key={item.name}
               href={item.link}
+              onMouseEnter={() => setActive(null)}
               className="cursor-pointer rounded-lg px-4 py-2.5 text-base font-medium text-neutral-700 transition hover:bg-neutral-100 hover:text-black dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-white"
             >
               {item.name}
@@ -271,45 +321,45 @@ const DesktopDropdownItem = ({
             layoutId="active-dropdown"
             className="overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-neutral-950"
           >
-                {item.groups ? (
-                  <motion.div layout className="flex w-max gap-0 p-4">
-                    {item.groups.map((group, idx) => (
-                      <div
-                        key={group.groupName}
-                        className={cn(
-                          "flex flex-col gap-1 px-4",
-                          idx !== item.groups!.length - 1 &&
-                            "border-r border-neutral-200 dark:border-neutral-800",
-                        )}
-                      >
-                        <span className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-                          {group.groupName}
-                        </span>
-                        {group.items.map((child) => (
-                          <Link
-                            key={child.name}
-                            href={child.link}
-                            className="cursor-pointer whitespace-nowrap rounded-lg px-3 py-2 text-sm text-neutral-700 transition hover:bg-neutral-100 hover:text-black dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-white"
-                          >
-                            {child.name}
-                          </Link>
-                        ))}
-                      </div>
-                    ))}
-                  </motion.div>
-                ) : (
-                  <motion.div layout className="flex w-max flex-col gap-1 p-3">
-                    {item.children!.map((child) => (
+            {item.groups ? (
+              <motion.div layout className="flex w-max gap-0 p-4">
+                {item.groups.map((group, idx) => (
+                  <div
+                    key={group.groupName}
+                    className={cn(
+                      "flex flex-col gap-1 px-4",
+                      idx !== item.groups!.length - 1 &&
+                        "border-r border-neutral-200 dark:border-neutral-800",
+                    )}
+                  >
+                    <span className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                      {group.groupName}
+                    </span>
+                    {group.items.map((child) => (
                       <Link
                         key={child.name}
                         href={child.link}
-                        className="cursor-pointer rounded-lg px-4 py-2.5 text-base text-neutral-700 transition hover:bg-neutral-100 hover:text-black dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-white"
+                        className="cursor-pointer whitespace-nowrap rounded-lg px-3 py-2 text-sm text-neutral-700 transition hover:bg-neutral-100 hover:text-black dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-white"
                       >
                         {child.name}
                       </Link>
                     ))}
-                  </motion.div>
-                )}
+                  </div>
+                ))}
+              </motion.div>
+            ) : (
+              <motion.div layout className="flex w-max flex-col gap-1 p-3">
+                {item.children!.map((child) => (
+                  <Link
+                    key={child.name}
+                    href={child.link}
+                    className="cursor-pointer rounded-lg px-4 py-2.5 text-base text-neutral-700 transition hover:bg-neutral-100 hover:text-black dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-white"
+                  >
+                    {child.name}
+                  </Link>
+                ))}
+              </motion.div>
+            )}
           </motion.div>
         </div>
       )}
@@ -400,25 +450,38 @@ const SearchBar = () => {
 };
 
 // ─── 오늘의 인기 매물 티커 ──────────────────────────
-const trendingItems = [
-  { rank: 1, name: "CAT 320D 굴삭기", link: "/listings/1" },
-  { rank: 2, name: "두산 DX225 굴삭기", link: "/listings/2" },
-  { rank: 3, name: "현대 R210W-9S 휠굴삭기", link: "/listings/3" },
-  { rank: 4, name: "볼보 EC210B 굴삭기", link: "/listings/4" },
-  { rank: 5, name: "코마츠 PC200-8 굴삭기", link: "/listings/5" },
-];
+type TrendingItem = { rank: number; name: string; link: string };
 
 const TrendingTicker = () => {
+  const [items, setItems] = useState<TrendingItem[]>([]);
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setIndex((prev) => (prev + 1) % trendingItems.length);
-    }, 3000);
-    return () => clearInterval(timer);
+    const supabase = createClient();
+    supabase.rpc("get_trending_listings", { p_limit: 5 }).then(({ data }) => {
+      if (data && data.length > 0) {
+        setItems(
+          data.map((row, i) => ({
+            rank: i + 1,
+            name: `${row.manufacturer} ${row.model}`,
+            link: `/listings/${row.id}`,
+          })),
+        );
+      }
+    });
   }, []);
 
-  const item = trendingItems[index];
+  useEffect(() => {
+    if (items.length === 0) return;
+    const timer = setInterval(() => {
+      setIndex((prev) => (prev + 1) % items.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [items.length]);
+
+  if (items.length === 0) return null;
+
+  const item = items[index];
 
   return (
     <div className="hidden items-center gap-2 text-sm lg:flex">
@@ -476,6 +539,115 @@ const ThemeToggle = () => {
         <IconMoon className="h-4 w-4" />
       )}
     </button>
+  );
+};
+
+// ─── 사용자 인증 영역 ──────────────────────────────
+const UserAuthSection = ({ user }: { user: User | null }) => {
+  const router = useRouter();
+  const [credits, setCredits] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    const supabase = createClient();
+    let cancelled = false;
+    supabase
+      .from("profiles")
+      .select("credits")
+      .eq("id", user.id)
+      .single()
+      .then(({ data }) => {
+        if (!cancelled && data) setCredits(data.credits);
+      });
+    return () => { cancelled = true; };
+  }, [user]);
+
+  async function handleLogout() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/");
+    router.refresh();
+  }
+
+  const displayName =
+    user?.user_metadata?.full_name || user?.email?.split("@")[0] || "사용자";
+
+  const initial = displayName.charAt(0).toUpperCase();
+
+  if (!user) {
+    return (
+      <div className="flex items-center gap-3">
+        <Link
+          href="/login"
+          className="cursor-pointer rounded-lg px-4 py-2 text-sm font-medium text-neutral-600 transition hover:text-black dark:text-neutral-400 dark:hover:text-white"
+        >
+          로그인
+        </Link>
+        <Link
+          href="/register"
+          className="cursor-pointer rounded-lg bg-orange-600 px-5 py-2 text-sm font-bold text-white transition hover:bg-orange-700 dark:bg-orange-600 dark:text-white dark:hover:bg-orange-700"
+        >
+          회원가입
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 transition hover:bg-neutral-100 dark:hover:bg-neutral-800">
+          <Avatar className="h-8 w-8">
+            <AvatarFallback className="bg-orange-600 text-sm font-bold text-white">
+              {initial}
+            </AvatarFallback>
+          </Avatar>
+          <span className="hidden text-sm font-medium text-neutral-700 dark:text-neutral-300 sm:inline">
+            {displayName}
+          </span>
+          <Link
+            href="/credits"
+            onClick={(e) => e.stopPropagation()}
+            className="hidden cursor-pointer items-center gap-1 rounded-full bg-orange-50 px-2.5 py-1 text-xs font-semibold text-orange-600 transition hover:bg-orange-100 dark:bg-orange-950/50 dark:text-orange-400 dark:hover:bg-orange-950/80 sm:flex"
+          >
+            <IconCoin className="h-3.5 w-3.5" />
+            {credits !== null ? credits.toLocaleString() : "-"}
+          </Link>
+          <IconChevronDown className="h-4 w-4 text-neutral-400" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuItem asChild>
+          <Link href="/mypage" className="cursor-pointer gap-2">
+            <IconUser className="h-4 w-4" />
+            마이페이지
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/credits" className="cursor-pointer gap-2">
+            <IconCoin className="h-4 w-4" />
+            포인트 충전
+            <span className="ml-auto text-xs font-semibold text-orange-600 dark:text-orange-400">
+              {credits !== null ? credits.toLocaleString() : "-"}
+            </span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/settings" className="cursor-pointer gap-2">
+            <IconSettings className="h-4 w-4" />
+            설정
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={handleLogout}
+          className="cursor-pointer gap-2 text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400"
+        >
+          <IconLogout className="h-4 w-4" />
+          로그아웃
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 

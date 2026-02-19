@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useActionState, useEffect } from "react"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import {
@@ -13,7 +13,9 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { ImagePlus, X } from "lucide-react"
+import { ImagePlus, X, Loader2 } from "lucide-react"
+import { toast } from "sonner"
+import { registerCompany } from "@/app/(main)/companies/register/actions"
 
 const COMPANY_CATEGORY_OPTIONS = [
   { value: "건설기계임대차", label: "건설기계임대차" },
@@ -27,47 +29,77 @@ const COMPANY_CATEGORY_OPTIONS = [
   { value: "기타일반업", label: "기타일반업" },
 ]
 
-interface CompanyFormData {
-  category: string
-  password: string
-  companyName: string
-  address: string
-  contact: string
-  fax: string
-  website: string
-  description: string
-}
+const MAX_SIZE = 50 * 1024 // 50KB
 
-const initialFormData: CompanyFormData = {
-  category: "",
-  password: "",
-  companyName: "",
-  address: "",
-  contact: "",
-  fax: "",
-  website: "",
-  description: "",
+function compressToWebp(file: File): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => {
+      const canvas = document.createElement("canvas")
+      canvas.width = img.width
+      canvas.height = img.height
+      const ctx = canvas.getContext("2d")
+      if (!ctx) return reject(new Error("Canvas not supported"))
+      ctx.drawImage(img, 0, 0)
+
+      let quality = 0.9
+      const tryCompress = () => {
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) return reject(new Error("Compression failed"))
+            if (blob.size <= MAX_SIZE || quality <= 0.1) {
+              resolve(new File([blob], file.name.replace(/\.[^.]+$/, ".webp"), { type: "image/webp" }))
+            } else {
+              quality -= 0.1
+              tryCompress()
+            }
+          },
+          "image/webp",
+          quality
+        )
+      }
+      tryCompress()
+    }
+    img.onerror = () => reject(new Error("Image load failed"))
+    img.src = URL.createObjectURL(file)
+  })
 }
 
 export function CompanyRegisterForm() {
-  const [formData, setFormData] = useState<CompanyFormData>(initialFormData)
+  const [state, formAction, isPending] = useActionState(registerCompany, null)
+  const [category, setCategory] = useState("")
   const [logo, setLogo] = useState<File | null>(null)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const [isConverting, setIsConverting] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const formRef = useRef<HTMLFormElement>(null)
 
-  function updateField(field: keyof CompanyFormData, value: string) {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-  }
+  useEffect(() => {
+    if (!state) return
+    if (state.success) {
+      toast.success(state.message)
+      formRef.current?.reset()
+      setCategory("")
+      setLogo(null)
+      setLogoPreview(null)
+    } else {
+      toast.error(state.message)
+    }
+  }, [state])
 
-  function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (file) {
-      setLogo(file)
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setLogoPreview(reader.result as string)
-      }
-      reader.readAsDataURL(file)
+    if (!file) return
+
+    setIsConverting(true)
+    try {
+      const webpFile = await compressToWebp(file)
+      setLogo(webpFile)
+      setLogoPreview(URL.createObjectURL(webpFile))
+    } catch {
+      toast.error("이미지 변환에 실패했습니다.")
+    } finally {
+      setIsConverting(false)
     }
   }
 
@@ -79,24 +111,28 @@ export function CompanyRegisterForm() {
     }
   }
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    // TODO: submit logic
-    console.log({ formData, logo })
-  }
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form
+      ref={formRef}
+      action={(fd) => {
+        if (logo) {
+          fd.delete("logo")
+          fd.append("logo", logo)
+        }
+        formAction(fd)
+      }}
+      className="space-y-6"
+    >
+      {/* hidden field for category (Select doesn't use native input) */}
+      <input type="hidden" name="category" value={category} />
+
       {/* ── 업체 분류 ── */}
       <section>
         <h2 className="mb-4 text-base font-semibold">업체 분류</h2>
         <FieldGroup>
           <Field>
             <FieldLabel>분류</FieldLabel>
-            <Select
-              value={formData.category}
-              onValueChange={(v) => updateField("category", v)}
-            >
+            <Select value={category} onValueChange={setCategory}>
               <SelectTrigger className="w-full max-w-xs cursor-pointer">
                 <SelectValue placeholder="분류 선택" />
               </SelectTrigger>
@@ -125,45 +161,44 @@ export function CompanyRegisterForm() {
           <Field>
             <FieldLabel>비밀번호</FieldLabel>
             <Input
+              name="password"
               type="password"
-              value={formData.password}
-              onChange={(e) => updateField("password", e.target.value)}
               placeholder="비밀번호 입력"
+              required
             />
           </Field>
 
           <Field>
             <FieldLabel>매매업체상호</FieldLabel>
             <Input
-              value={formData.companyName}
-              onChange={(e) => updateField("companyName", e.target.value)}
+              name="companyName"
               placeholder="업체명 입력"
+              required
             />
           </Field>
 
           <Field className="sm:col-span-2">
             <FieldLabel>주소지</FieldLabel>
             <Input
-              value={formData.address}
-              onChange={(e) => updateField("address", e.target.value)}
+              name="address"
               placeholder="주소 입력"
+              required
             />
           </Field>
 
           <Field>
             <FieldLabel>연락처</FieldLabel>
             <Input
-              value={formData.contact}
-              onChange={(e) => updateField("contact", e.target.value)}
+              name="contact"
               placeholder="010-0000-0000"
+              required
             />
           </Field>
 
           <Field>
             <FieldLabel>FAX</FieldLabel>
             <Input
-              value={formData.fax}
-              onChange={(e) => updateField("fax", e.target.value)}
+              name="fax"
               placeholder="02-0000-0000"
             />
           </Field>
@@ -171,8 +206,7 @@ export function CompanyRegisterForm() {
           <Field className="sm:col-span-2">
             <FieldLabel>홈페이지</FieldLabel>
             <Input
-              value={formData.website}
-              onChange={(e) => updateField("website", e.target.value)}
+              name="website"
               placeholder="https://"
             />
           </Field>
@@ -188,8 +222,7 @@ export function CompanyRegisterForm() {
           <Field>
             <FieldLabel>업체소개</FieldLabel>
             <Textarea
-              value={formData.description}
-              onChange={(e) => updateField("description", e.target.value)}
+              name="description"
               placeholder="업체에 대한 소개를 입력해주세요"
               className="min-h-32"
             />
@@ -209,11 +242,16 @@ export function CompanyRegisterForm() {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp"
                 onChange={handleLogoChange}
                 className="hidden"
               />
-              {logoPreview ? (
+              {isConverting ? (
+                <div className="flex h-32 w-32 flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed border-muted-foreground/25 text-muted-foreground">
+                  <Loader2 className="h-8 w-8 animate-spin" />
+                  <span className="text-xs">변환 중...</span>
+                </div>
+              ) : logoPreview ? (
                 <div className="relative">
                   <img
                     src={logoPreview}
@@ -227,6 +265,9 @@ export function CompanyRegisterForm() {
                   >
                     <X className="h-3 w-3" />
                   </button>
+                  <span className="mt-1 block text-xs text-muted-foreground">
+                    WebP · {(logo?.size ?? 0) < 1024 ? `${logo?.size}B` : `${((logo?.size ?? 0) / 1024).toFixed(1)}KB`}
+                  </span>
                 </div>
               ) : (
                 <button
@@ -244,8 +285,15 @@ export function CompanyRegisterForm() {
       </section>
 
       <div className="flex justify-end pt-4">
-        <Button type="submit" className="cursor-pointer px-8">
-          업체 등록
+        <Button type="submit" disabled={isPending} className="cursor-pointer px-8">
+          {isPending ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              등록 중...
+            </>
+          ) : (
+            "업체 등록"
+          )}
         </Button>
       </div>
     </form>

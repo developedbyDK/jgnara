@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -10,21 +10,37 @@ import {
   IconCrown,
   IconChevronLeft,
   IconChevronRight,
+  IconLoader2,
 } from "@tabler/icons-react";
-import {
-  getListingsByCategory,
-  gradeStyle,
-  type ListingItem,
-} from "@/lib/constants/mock-listings";
+import { createClient } from "@/lib/supabase/client";
+import { gradeStyle } from "@/lib/constants/mock-listings";
 
 // ─── Types ───────────────────────────────────────────
 type SortOption = "latest" | "price-asc" | "price-desc" | "grade";
+
+interface ListingRow {
+  id: string;
+  type: string;
+  year: number;
+  month: number;
+  category: string;
+  condition: string;
+  manufacturer: string;
+  model: string;
+  price: number;
+  region: string;
+  usage_amount: number | null;
+  usage_unit: string | null;
+  photos: string[] | null;
+  listing_type: string;
+  created_at: string;
+  company_name: string | null;
+}
 
 const gradeOrder: Record<string, number> = {
   "A+": 0, A: 1, "A-": 2, "B+": 3, B: 4, "B-": 5, "C+": 6, C: 7, "C-": 8,
 };
 
-// ─── Sort Options ────────────────────────────────────
 const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: "latest", label: "최신순" },
   { value: "price-asc", label: "낮은가격순" },
@@ -34,81 +50,89 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
 
 const ITEMS_PER_PAGE = 10;
 
-// ─── Default listings fallback ───────────────────────
-function generateDefaultListings(slug: string): ListingItem[] {
-  const grades = ["A+", "A", "A-", "B+", "B", "B-"] as const;
-  const regions = ["경기", "서울", "충남", "경남", "부산", "인천", "전북", "대전"];
-  const manufacturers = ["현대", "두산", "볼보", "CAT", "코벨코", "히타치"];
-  const IMG = [
-    "https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1621922688758-8d99e2bead70?q=80&w=600&auto=format&fit=crop",
-  ];
+const PLACEHOLDER_IMG =
+  "https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=600&auto=format&fit=crop";
 
-  return Array.from({ length: 12 }, (_, i) => ({
-    id: 9000 + i,
-    title: `${manufacturers[i % manufacturers.length]} ${slug} 장비 ${i + 1}`,
-    price: 2000 + i * 1200,
-    priceLabel: `${(2000 + i * 1200).toLocaleString()}만원`,
-    grade: grades[i % grades.length],
-    year: 2019 + (i % 5),
-    month: (i % 12) + 1,
-    region: regions[i % regions.length],
-    hours: `${(1500 + i * 800).toLocaleString()}HR`,
-    images: [IMG[i % IMG.length]],
-    href: "#",
-    createdAt: `2025-01-${String(15 - i).padStart(2, "0")}`,
-    manufacturer: manufacturers[i % manufacturers.length],
-    model: `Model-${i + 1}`,
-    category: slug,
-    categorySlug: slug,
-    isVip: i < 3,
-    type: "매매" as const,
-    engine: String(100 + i * 20),
-    transmission: "자동",
-    tonnage: String(5 + i * 3),
-    payment: "협의",
-    usageUnit: "HR" as const,
-    undercarriageType: "철(STEEL)",
-    undercarriageCondition: "중",
-    companyName: `${regions[i % regions.length]}중기`,
-    contact: "010-0000-0000",
-    youtubeUrl: "",
-    description: "",
-    listingType: "무료" as const,
-  }));
+// ─── Helpers ─────────────────────────────────────────
+function formatPrice(price: number): string {
+  if (price >= 10000) {
+    const eok = Math.floor(price / 10000);
+    const man = price % 10000;
+    return man > 0
+      ? `${eok}억 ${man.toLocaleString()}만원`
+      : `${eok}억원`;
+  }
+  return `${price.toLocaleString()}만원`;
+}
+
+function formatUsage(amount: number | null, unit: string | null): string {
+  if (!amount || !unit) return "-";
+  return `${amount.toLocaleString()}${unit}`;
+}
+
+function getThumb(photos: string[] | null): string {
+  return photos && photos.length > 0 ? photos[0] : PLACEHOLDER_IMG;
+}
+
+function getTitle(row: ListingRow): string {
+  return `${row.manufacturer} ${row.model} ${row.category}`;
 }
 
 // ─── Component ───────────────────────────────────────
 export function CategoryListingContent({
   categorySlug,
+  categoryValues,
 }: {
   categorySlug: string;
+  categoryValues: string[];
 }) {
   const [sort, setSort] = useState<SortOption>("latest");
   const [currentPage, setCurrentPage] = useState(1);
+  const [listings, setListings] = useState<ListingRow[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const allListings = (() => {
-    const fromMock = getListingsByCategory(categorySlug);
-    return fromMock.length > 0 ? fromMock : generateDefaultListings(categorySlug);
-  })();
+  useEffect(() => {
+    async function fetchListings() {
+      setLoading(true);
+      const supabase = createClient();
 
-  const vipListings = allListings.filter((item) => item.isVip);
-  const regularListings = allListings.filter((item) => !item.isVip);
+      let query = supabase
+        .from("listings")
+        .select(
+          "id, type, year, month, category, condition, manufacturer, model, price, region, usage_amount, usage_unit, photos, listing_type, created_at, company_name"
+        )
+        .eq("status", "active")
+        .order("created_at", { ascending: false });
+
+      if (categoryValues.length > 0) {
+        query = query.in("category", categoryValues);
+      }
+
+      const { data } = await query;
+      setListings(data ?? []);
+      setLoading(false);
+    }
+
+    fetchListings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categorySlug, categoryValues.join(",")]);
+
+  const vipListings = listings.filter((item) => item.listing_type === "유료");
+  const regularListings = listings.filter((item) => item.listing_type !== "유료");
 
   const sortedRegular = useMemo(() => {
     const sorted = [...regularListings];
     switch (sort) {
       case "latest":
-        return sorted.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+        return sorted.sort((a, b) => b.created_at.localeCompare(a.created_at));
       case "price-asc":
         return sorted.sort((a, b) => a.price - b.price);
       case "price-desc":
         return sorted.sort((a, b) => b.price - a.price);
       case "grade":
         return sorted.sort(
-          (a, b) => (gradeOrder[a.grade] ?? 99) - (gradeOrder[b.grade] ?? 99)
+          (a, b) =>
+            (gradeOrder[a.condition] ?? 99) - (gradeOrder[b.condition] ?? 99)
         );
       default:
         return sorted;
@@ -120,6 +144,24 @@ export function CategoryListingContent({
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <IconLoader2 className="h-6 w-6 animate-spin text-neutral-400" />
+      </div>
+    );
+  }
+
+  if (listings.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">
+          등록된 매물이 없습니다
+        </p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -140,23 +182,23 @@ export function CategoryListingContent({
             {vipListings.map((item) => (
               <Link
                 key={item.id}
-                href={item.href}
+                href={`/listings/${item.id}`}
                 className="group cursor-pointer"
               >
                 <div className="overflow-hidden border border-orange-200 bg-white transition-shadow hover:shadow-md dark:border-orange-900/50 dark:bg-neutral-900">
                   <div className="relative aspect-[4/3] w-full overflow-hidden">
                     <img
-                      src={item.images[0]}
-                      alt={item.title}
+                      src={getThumb(item.photos)}
+                      alt={getTitle(item)}
                       className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                     <Badge
                       className={cn(
                         "absolute top-2 left-2 text-[10px] font-bold",
-                        gradeStyle[item.grade]
+                        gradeStyle[item.condition]
                       )}
                     >
-                      {item.grade}급
+                      {item.condition}급
                     </Badge>
                     <div className="absolute top-2 right-2 flex items-center gap-0.5 bg-orange-600 px-1.5 py-0.5">
                       <IconCrown className="h-3 w-3 text-white" />
@@ -167,10 +209,10 @@ export function CategoryListingContent({
                   </div>
                   <div className="p-2.5">
                     <h3 className="truncate text-sm font-semibold text-neutral-900 group-hover:text-neutral-700 dark:text-neutral-100 dark:group-hover:text-neutral-300">
-                      {item.title}
+                      {getTitle(item)}
                     </h3>
                     <p className="mt-0.5 text-sm font-bold text-primary">
-                      {item.priceLabel}
+                      {formatPrice(item.price)}
                     </p>
                     <div className="mt-1.5 flex items-center gap-2 text-[11px] text-neutral-500 dark:text-neutral-400">
                       <span>{item.year}년</span>
@@ -182,7 +224,7 @@ export function CategoryListingContent({
                       <span className="text-neutral-300 dark:text-neutral-600">|</span>
                       <span className="flex items-center gap-0.5">
                         <IconClock className="h-3 w-3" />
-                        {item.hours}
+                        {formatUsage(item.usage_amount, item.usage_unit)}
                       </span>
                     </div>
                   </div>
@@ -241,7 +283,7 @@ export function CategoryListingContent({
           {paginatedRegular.map((item) => (
             <Link
               key={item.id}
-              href={item.href}
+              href={`/listings/${item.id}`}
               className="group cursor-pointer"
             >
               {/* Desktop row */}
@@ -249,17 +291,17 @@ export function CategoryListingContent({
                 <div className="flex min-w-0 items-center gap-2.5">
                   <div className="relative h-12 w-16 flex-shrink-0 overflow-hidden border border-neutral-200 dark:border-neutral-700">
                     <img
-                      src={item.images[0]}
-                      alt={item.title}
+                      src={getThumb(item.photos)}
+                      alt={getTitle(item)}
                       className="h-full w-full object-cover"
                     />
                   </div>
                   <div className="min-w-0">
                     <h3 className="truncate text-sm font-medium text-neutral-900 group-hover:text-orange-600 dark:text-neutral-100 dark:group-hover:text-orange-400">
-                      {item.title}
+                      {getTitle(item)}
                     </h3>
                     <p className="mt-0.5 truncate text-xs text-neutral-400">
-                      {item.manufacturer} · {item.hours}
+                      {item.manufacturer} · {formatUsage(item.usage_amount, item.usage_unit)}
                     </p>
                   </div>
                 </div>
@@ -267,14 +309,14 @@ export function CategoryListingContent({
                   <Badge
                     className={cn(
                       "text-[10px] font-bold",
-                      gradeStyle[item.grade]
+                      gradeStyle[item.condition]
                     )}
                   >
-                    {item.grade}급
+                    {item.condition}급
                   </Badge>
                 </span>
                 <span className="w-24 text-right text-sm font-bold text-primary">
-                  {item.priceLabel}
+                  {formatPrice(item.price)}
                 </span>
                 <span className="w-16 text-center text-xs text-neutral-600 dark:text-neutral-400">
                   {item.year}년
@@ -283,7 +325,7 @@ export function CategoryListingContent({
                   {item.region}
                 </span>
                 <span className="w-20 text-center text-xs text-neutral-400">
-                  {item.createdAt.slice(5).replace("-", ".")}
+                  {item.created_at.slice(5, 10).replace("-", ".")}
                 </span>
               </div>
 
@@ -291,30 +333,30 @@ export function CategoryListingContent({
               <div className="flex items-center gap-3 px-2 py-3 transition-colors hover:bg-neutral-50 sm:hidden dark:hover:bg-neutral-800/50">
                 <div className="relative h-14 w-20 flex-shrink-0 overflow-hidden border border-neutral-200 dark:border-neutral-700">
                   <img
-                    src={item.images[0]}
-                    alt={item.title}
+                    src={getThumb(item.photos)}
+                    alt={getTitle(item)}
                     className="h-full w-full object-cover"
                   />
                 </div>
                 <div className="min-w-0 flex-1">
                   <h3 className="truncate text-sm font-medium text-neutral-900 dark:text-neutral-100">
-                    {item.title}
+                    {getTitle(item)}
                   </h3>
                   <p className="mt-0.5 text-sm font-bold text-primary">
-                    {item.priceLabel}
+                    {formatPrice(item.price)}
                   </p>
                   <div className="mt-1 flex items-center gap-2 text-[11px] text-neutral-400">
                     <Badge
                       className={cn(
                         "px-1 py-0 text-[9px] font-bold",
-                        gradeStyle[item.grade]
+                        gradeStyle[item.condition]
                       )}
                     >
-                      {item.grade}
+                      {item.condition}
                     </Badge>
                     <span>{item.year}년</span>
                     <span>{item.region}</span>
-                    <span>{item.hours}</span>
+                    <span>{formatUsage(item.usage_amount, item.usage_unit)}</span>
                   </div>
                 </div>
               </div>

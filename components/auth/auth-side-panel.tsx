@@ -17,9 +17,11 @@ export function AuthSidePanel() {
           className="mb-6 flex items-center justify-center text-4xl tracking-tight"
           style={{ fontFamily: "'EutmanEungtteong', sans-serif" }}
         >
-          <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-orange-600 text-3xl font-bold text-white">J</span>
+          <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-orange-600 text-3xl font-bold text-white">
+            J
+          </span>
           <span className="ml-1.5 text-orange-500">중기</span>
-          <span className="text-orange-600">나라</span>
+          <span className="text-orange-600">.com</span>
         </div>
         <EquipmentIcons />
         <p className="text-center text-xl font-semibold text-neutral-600 dark:text-neutral-400">

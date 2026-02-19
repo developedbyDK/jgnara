@@ -8,14 +8,18 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { MONTHLY_DATA } from "@/lib/constants/mock-admin";
+import type { MonthlyData } from "@/lib/dashboard-queries";
 
 const chartConfig = {
-  매출: { label: "매출 (만원)", color: "hsl(221, 83%, 53%)" },
-  거래: { label: "거래건수", color: "hsl(142, 71%, 45%)" },
+  매물등록: { label: "매물등록", color: "hsl(221, 83%, 53%)" },
+  게시글: { label: "게시글", color: "hsl(142, 71%, 45%)" },
 } satisfies ChartConfig;
 
-export function MonthlyChart() {
+interface MonthlyChartProps {
+  data: MonthlyData[];
+}
+
+export function MonthlyChart({ data }: MonthlyChartProps) {
   return (
     <Card>
       <CardHeader>
@@ -23,7 +27,7 @@ export function MonthlyChart() {
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-[280px] w-full">
-          <AreaChart data={MONTHLY_DATA} accessibilityLayer>
+          <AreaChart data={data} accessibilityLayer>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="month"
@@ -34,19 +38,19 @@ export function MonthlyChart() {
             <YAxis tickLine={false} axisLine={false} tickMargin={8} />
             <ChartTooltip content={<ChartTooltipContent />} />
             <Area
-              dataKey="매출"
+              dataKey="매물등록"
               type="monotone"
-              fill="var(--color-매출)"
+              fill="var(--color-매물등록)"
               fillOpacity={0.15}
-              stroke="var(--color-매출)"
+              stroke="var(--color-매물등록)"
               strokeWidth={2}
             />
             <Area
-              dataKey="거래"
+              dataKey="게시글"
               type="monotone"
-              fill="var(--color-거래)"
+              fill="var(--color-게시글)"
               fillOpacity={0.15}
-              stroke="var(--color-거래)"
+              stroke="var(--color-게시글)"
               strokeWidth={2}
             />
           </AreaChart>

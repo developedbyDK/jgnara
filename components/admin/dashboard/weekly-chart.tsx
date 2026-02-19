@@ -8,7 +8,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { WEEKLY_DATA } from "@/lib/constants/mock-admin";
+import type { WeeklyData } from "@/lib/dashboard-queries";
 
 const chartConfig = {
   신규회원: { label: "신규회원", color: "hsl(221, 83%, 53%)" },
@@ -16,7 +16,11 @@ const chartConfig = {
   게시글: { label: "게시글", color: "hsl(262, 83%, 58%)" },
 } satisfies ChartConfig;
 
-export function WeeklyChart() {
+interface WeeklyChartProps {
+  data: WeeklyData[];
+}
+
+export function WeeklyChart({ data }: WeeklyChartProps) {
   return (
     <Card>
       <CardHeader>
@@ -24,7 +28,7 @@ export function WeeklyChart() {
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-[280px] w-full">
-          <BarChart data={WEEKLY_DATA} accessibilityLayer>
+          <BarChart data={data} accessibilityLayer>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="day"

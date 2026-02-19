@@ -45,7 +45,7 @@ export default function BoardWritePage() {
 
         {/* Form */}
         <div className="mt-6">
-          <BoardWriteForm />
+          <BoardWriteForm boardSlug="free" />
         </div>
       </div>
     </CategorySidebar>

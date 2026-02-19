@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useTransition } from "react";
 import Link from "next/link";
-import { Search, MoreHorizontal, Eye, Ban, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Search, MoreHorizontal, Eye, Ban, ShieldCheck, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,36 +30,64 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  MOCK_USERS,
   getStatusColor,
   getRoleColor,
   type UserRole,
-  type UserStatus,
 } from "@/lib/constants/mock-admin";
+import type { AdminUserRow } from "@/app/(admin)/hs-ctrl-x7k9m/(dashboard)/users/actions";
+import { updateUserStatus } from "@/app/(admin)/hs-ctrl-x7k9m/(dashboard)/users/actions";
 
 const ITEMS_PER_PAGE = 10;
 
-export function UserTable() {
+interface UserTableProps {
+  users: AdminUserRow[];
+}
+
+function formatDate(dateStr: string | null) {
+  if (!dateStr) return "-";
+  return new Date(dateStr).toLocaleDateString("ko-KR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+}
+
+function truncateId(id: string) {
+  return id.slice(0, 8);
+}
+
+export function UserTable({ users }: UserTableProps) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [page, setPage] = useState(1);
 
   const filtered = useMemo(() => {
-    return MOCK_USERS.filter((user) => {
+    return users.filter((user) => {
       const matchSearch =
         !search ||
-        user.name.includes(search) ||
+        user.full_name.includes(search) ||
         user.email.includes(search) ||
         user.phone.includes(search);
       const matchRole = roleFilter === "all" || user.role === roleFilter;
       const matchStatus = statusFilter === "all" || user.status === statusFilter;
       return matchSearch && matchRole && matchStatus;
     });
-  }, [search, roleFilter, statusFilter]);
+  }, [users, search, roleFilter, statusFilter]);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paged = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+
+  async function handleStatusChange(userId: string, status: "활성" | "정지" | "탈퇴") {
+    const result = await updateUserStatus(userId, status);
+    if (result.success) {
+      startTransition(() => {
+        router.refresh();
+      });
+    }
+  }
 
   return (
     <div className="space-y-4">
@@ -105,7 +134,7 @@ export function UserTable() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-20">ID</TableHead>
+              <TableHead className="w-24">ID</TableHead>
               <TableHead>이름</TableHead>
               <TableHead className="hidden md:table-cell">이메일</TableHead>
               <TableHead className="hidden lg:table-cell">전화번호</TableHead>
@@ -117,24 +146,26 @@ export function UserTable() {
           </TableHeader>
           <TableBody>
             {paged.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell className="font-mono text-xs">{user.id}</TableCell>
+              <TableRow key={user.id} className={isPending ? "opacity-50" : ""}>
+                <TableCell className="font-mono text-xs text-muted-foreground">
+                  {truncateId(user.id)}
+                </TableCell>
                 <TableCell className="font-medium">
                   <Link
                     href={`/hs-ctrl-x7k9m/users/${user.id}`}
                     className="hover:underline cursor-pointer"
                   >
-                    {user.name}
+                    {user.full_name || "(이름 없음)"}
                   </Link>
                 </TableCell>
                 <TableCell className="hidden md:table-cell text-muted-foreground text-sm">
                   {user.email}
                 </TableCell>
                 <TableCell className="hidden lg:table-cell text-muted-foreground text-sm">
-                  {user.phone}
+                  {user.phone || "-"}
                 </TableCell>
                 <TableCell>
-                  <Badge variant="secondary" className={`text-[11px] ${getRoleColor(user.role)}`}>
+                  <Badge variant="secondary" className={`text-[11px] ${getRoleColor(user.role as UserRole)}`}>
                     {user.role}
                   </Badge>
                 </TableCell>
@@ -144,7 +175,7 @@ export function UserTable() {
                   </Badge>
                 </TableCell>
                 <TableCell className="hidden lg:table-cell text-muted-foreground text-sm">
-                  {user.registeredAt}
+                  {formatDate(user.created_at)}
                 </TableCell>
                 <TableCell>
                   <DropdownMenu>
@@ -160,14 +191,30 @@ export function UserTable() {
                           상세보기
                         </Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer">
-                        <Ban className="mr-2 size-4" />
-                        정지
-                      </DropdownMenuItem>
+                      {user.status === "활성" ? (
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={() => handleStatusChange(user.id, "정지")}
+                        >
+                          <Ban className="mr-2 size-4" />
+                          정지
+                        </DropdownMenuItem>
+                      ) : user.status === "정지" ? (
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={() => handleStatusChange(user.id, "활성")}
+                        >
+                          <ShieldCheck className="mr-2 size-4" />
+                          정지 해제
+                        </DropdownMenuItem>
+                      ) : null}
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem className="cursor-pointer text-red-600">
+                      <DropdownMenuItem
+                        className="cursor-pointer text-red-600"
+                        onClick={() => handleStatusChange(user.id, "탈퇴")}
+                      >
                         <Trash2 className="mr-2 size-4" />
-                        삭제
+                        탈퇴 처리
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -186,11 +233,11 @@ export function UserTable() {
       </div>
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            총 {filtered.length}명
-          </p>
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">
+          총 {filtered.length}명
+        </p>
+        {totalPages > 1 && (
           <div className="flex gap-1">
             <Button
               variant="outline"
@@ -222,8 +269,8 @@ export function UserTable() {
               다음
             </Button>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

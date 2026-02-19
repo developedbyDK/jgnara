@@ -26,9 +26,9 @@ export function CookiesContent() {
         <div className="border-b border-neutral-200 px-5 py-3 dark:border-neutral-800">
           <p className={paragraph}>
             중기나라 (주) (이하 &quot;회사&quot;)는 이용자에게 더 나은 서비스를
-            제공하기 위해 쿠키(Cookie)를 사용합니다. 본 쿠키정책은 회사가
-            쿠키를 어떻게, 왜 사용하는지, 이용자가 쿠키를 어떻게 관리할 수
-            있는지에 대해 설명합니다.
+            제공하기 위해 쿠키(Cookie)를 사용합니다. 본 쿠키정책은 회사가 쿠키를
+            어떻게, 왜 사용하는지, 이용자가 쿠키를 어떻게 관리할 수 있는지에
+            대해 설명합니다.
           </p>
         </div>
 
@@ -64,13 +64,13 @@ export function CookiesContent() {
                 기억하여 보다 편리한 서비스를 제공하기 위해 사용됩니다.
               </li>
               <li className={listItem}>
-                <strong>분석 쿠키</strong>: 이용자의 서비스 이용 패턴을
-                분석하여 서비스를 개선하기 위해 사용됩니다. 방문 페이지, 접속
-                시간, 이용 빈도 등의 정보를 수집합니다.
+                <strong>분석 쿠키</strong>: 이용자의 서비스 이용 패턴을 분석하여
+                서비스를 개선하기 위해 사용됩니다. 방문 페이지, 접속 시간, 이용
+                빈도 등의 정보를 수집합니다.
               </li>
               <li className={listItem}>
-                <strong>광고 쿠키</strong>: 이용자의 관심사에 기반한 맞춤
-                광고를 제공하기 위해 사용됩니다.
+                <strong>광고 쿠키</strong>: 이용자의 관심사에 기반한 맞춤 광고를
+                제공하기 위해 사용됩니다.
               </li>
             </ol>
           </Article>
@@ -289,12 +289,8 @@ export function CookiesContent() {
             <div className="mt-4 border border-neutral-200 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800/50">
               <div className="divide-y divide-neutral-200 dark:divide-neutral-700">
                 <InfoRow label="이메일" value="privacy@hsheavy.co.kr" />
-                <InfoRow label="전화" value="1588-0000" />
-                <InfoRow
-                  label="문의 페이지"
-                  value="문의하기"
-                  href="/contact"
-                />
+                <InfoRow label="전화" value="070-7737-5000" />
+                <InfoRow label="문의 페이지" value="문의하기" href="/contact" />
               </div>
             </div>
           </Article>

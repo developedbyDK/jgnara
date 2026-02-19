@@ -20,18 +20,9 @@ import {
   IconSearch,
   IconPencil,
 } from "@tabler/icons-react"
+import type { Tables } from "@/lib/supabase/database.types"
 
-type Company = {
-  id: number
-  category: string
-  companyName: string
-  address: string
-  contact: string
-  fax: string
-  website: string
-  description: string
-  logoUrl: string | null
-}
+export type Company = Tables<"companies">
 
 const CATEGORIES = [
   "전체",
@@ -67,161 +58,25 @@ const CATEGORY_COLORS: Record<string, string> = {
     "bg-neutral-100 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-300",
 }
 
-const MOCK_COMPANIES: Company[] = [
-  {
-    id: 1,
-    category: "건설기계매매",
-    companyName: "중기나라",
-    address: "경기도 화성시 팔탄면 서해로 1234",
-    contact: "031-000-0000",
-    fax: "031-000-0001",
-    website: "https://hsheavy.com",
-    description:
-      "굴착기, 로더, 크레인 등 다양한 건설기계를 매매하는 전문업체입니다.",
-    logoUrl: null,
-  },
-  {
-    id: 2,
-    category: "건설기계임대차",
-    companyName: "대한중기렌탈",
-    address: "서울특별시 강남구 테헤란로 456",
-    contact: "02-123-4567",
-    fax: "02-123-4568",
-    website: "",
-    description:
-      "건설기계 장단기 임대 전문. 굴착기, 불도저, 크레인 등 다양한 장비를 보유하고 있습니다.",
-    logoUrl: null,
-  },
-  {
-    id: 3,
-    category: "정비업체",
-    companyName: "신한정비공업사",
-    address: "인천광역시 서구 가좌동 789",
-    contact: "032-987-6543",
-    fax: "032-987-6544",
-    website: "",
-    description: "중장비 유압, 엔진 정비 전문. 20년 경력의 전문 기술진 보유.",
-    logoUrl: null,
-  },
-  {
-    id: 4,
-    category: "부품업체",
-    companyName: "우성부품",
-    address: "경기도 안산시 단원구 산업로 321",
-    contact: "031-555-1234",
-    fax: "031-555-1235",
-    website: "https://example.com",
-    description:
-      "굴착기, 로더, 지게차 등 건설기계 순정부품 및 호환부품 판매.",
-    logoUrl: null,
-  },
-  {
-    id: 5,
-    category: "제조 및 수출입업체",
-    companyName: "글로벌머시너리",
-    address: "부산광역시 강서구 녹산산업로 567",
-    contact: "051-777-8888",
-    fax: "051-777-8889",
-    website: "https://example.com",
-    description:
-      "건설기계 부착물 제조 및 해외 수출입 전문. 브레이커, 버켓 등 제조.",
-    logoUrl: null,
-  },
-  {
-    id: 6,
-    category: "건설기계지입사",
-    companyName: "삼성지입사",
-    address: "대전광역시 유성구 대학로 100",
-    contact: "042-333-4444",
-    fax: "042-333-4445",
-    website: "",
-    description: "건설기계 지입 전문. 안정적인 물량 확보와 관리 서비스 제공.",
-    logoUrl: null,
-  },
-  {
-    id: 7,
-    category: "추레라업체",
-    companyName: "한국특수운송",
-    address: "경기도 평택시 포승읍 산단로 200",
-    contact: "031-666-7777",
-    fax: "031-666-7778",
-    website: "",
-    description:
-      "중장비 운송 전문 추레라업체. 전국 어디든 안전하게 운송합니다.",
-    logoUrl: null,
-  },
-  {
-    id: 8,
-    category: "건설기계매매",
-    companyName: "동원중기",
-    address: "경기도 시흥시 정왕동 456",
-    contact: "031-888-9999",
-    fax: "031-888-9998",
-    website: "",
-    description: "중고 건설기계 매매 전문. 굴착기, 크레인 다수 보유.",
-    logoUrl: null,
-  },
-  {
-    id: 9,
-    category: "정비업체",
-    companyName: "제일유압정비",
-    address: "충남 천안시 서북구 성정동 100",
-    contact: "041-222-3333",
-    fax: "041-222-3334",
-    website: "",
-    description: "유압장치 전문 정비. 실린더, 펌프, 밸브 수리.",
-    logoUrl: null,
-  },
-  {
-    id: 10,
-    category: "기타건설관련업",
-    companyName: "건설안전교육원",
-    address: "서울특별시 송파구 올림픽로 300",
-    contact: "02-444-5555",
-    fax: "02-444-5556",
-    website: "https://example.com",
-    description: "건설기계 안전교육 및 자격증 취득 전문 교육기관.",
-    logoUrl: null,
-  },
-  {
-    id: 11,
-    category: "건설기계임대차",
-    companyName: "경인중기렌탈",
-    address: "경기도 부천시 원미구 중동로 55",
-    contact: "032-111-2222",
-    fax: "032-111-2223",
-    website: "",
-    description: "수도권 건설기계 단기 임대 전문. 빠른 출동 서비스.",
-    logoUrl: null,
-  },
-  {
-    id: 12,
-    category: "부품업체",
-    companyName: "태양기계부품",
-    address: "경남 창원시 의창구 팔용동 78",
-    contact: "055-999-8888",
-    fax: "055-999-8889",
-    website: "",
-    description: "건설기계 엔진부품, 하부부품 전문 공급.",
-    logoUrl: null,
-  },
-]
-
 const ITEMS_PER_PAGE = 9
 
-export function CompanySearchBoard() {
+interface CompanySearchBoardProps {
+  companies: Company[]
+}
+
+export function CompanySearchBoard({ companies }: CompanySearchBoardProps) {
   const [currentPage, setCurrentPage] = useState(1)
   const [selectedCategory, setSelectedCategory] = useState("전체")
   const [searchQuery, setSearchQuery] = useState("")
 
-  const filteredData = MOCK_COMPANIES.filter((item) => {
+  const filteredData = companies.filter((item) => {
     if (selectedCategory !== "전체" && item.category !== selectedCategory)
       return false
     if (
       searchQuery &&
-      !item.companyName.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      !item.company_name.toLowerCase().includes(searchQuery.toLowerCase()) &&
       !item.address.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      !item.description.toLowerCase().includes(searchQuery.toLowerCase())
+      !(item.description ?? "").toLowerCase().includes(searchQuery.toLowerCase())
     )
       return false
     return true
@@ -309,21 +164,21 @@ export function CompanySearchBoard() {
               {/* Header: logo + name */}
               <div className="mb-3 flex items-start gap-3">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border bg-muted text-xs text-muted-foreground">
-                  {company.logoUrl ? (
+                  {company.logo_url ? (
                     <img
-                      src={company.logoUrl}
-                      alt={company.companyName}
+                      src={company.logo_url}
+                      alt={company.company_name}
                       className="h-full w-full rounded-md object-contain"
                     />
                   ) : (
                     <span className="text-lg font-bold">
-                      {company.companyName.charAt(0)}
+                      {company.company_name.charAt(0)}
                     </span>
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
                   <h3 className="truncate text-base font-semibold">
-                    {company.companyName}
+                    {company.company_name}
                   </h3>
                   <Badge
                     variant="outline"

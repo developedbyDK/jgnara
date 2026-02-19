@@ -1,7 +1,10 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
 import { AuthSidePanel } from "@/components/auth/auth-side-panel";
 
 export default function LoginPage() {
@@ -14,9 +17,53 @@ export default function LoginPage() {
 }
 
 function LoginForm() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    console.log("submitted form");
+    setError(null);
+    setLoading(true);
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    setLoading(false);
+
+    if (error) {
+      setError("이메일 또는 비밀번호가 올바르지 않습니다.");
+      return;
+    }
+
+    router.push("/");
+    router.refresh();
+  }
+
+  async function handleOAuthLogin(provider: "kakao" | "google") {
+    setError(null);
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
+    if (error) {
+      setError(error.message);
+    }
+  }
+
+  async function handleNaverLogin() {
+    // 네이버는 Supabase 기본 제공자가 아니므로
+    // Dashboard에서 Custom OIDC Provider로 설정 필요
+    setError("네이버 로그인은 준비 중입니다. 다른 방법으로 로그인해주세요.");
   }
 
   return (
@@ -28,9 +75,11 @@ function LoginForm() {
             className="flex cursor-pointer items-center text-2xl font-extrabold tracking-tight"
             style={{ fontFamily: "'EutmanEungtteong', sans-serif" }}
           >
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-orange-600 text-xl font-bold text-white">J</span>
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-orange-600 text-xl font-bold text-white">
+              J
+            </span>
             <span className="ml-1.5 text-orange-500">중기</span>
-            <span className="text-orange-600">나라</span>
+            <span className="text-orange-600">.com</span>
           </Link>
           <h2 className="mt-8 text-2xl leading-9 font-bold tracking-tight text-black dark:text-white">
             로그인
@@ -38,6 +87,12 @@ function LoginForm() {
         </div>
 
         <div className="mt-10">
+          {error && (
+            <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-600 dark:bg-red-950 dark:text-red-400">
+              {error}
+            </div>
+          )}
+
           <form onSubmit={onSubmit} className="space-y-6">
             <div>
               <label
@@ -51,6 +106,9 @@ function LoginForm() {
                   id="email"
                   type="email"
                   placeholder="example@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
                   className="shadow-input block w-full rounded-md border-0 bg-white px-4 py-1.5 text-black placeholder:text-gray-400 focus:ring-2 focus:ring-neutral-400 focus:outline-none sm:text-sm sm:leading-6 dark:bg-neutral-900 dark:text-white"
                 />
               </div>
@@ -68,6 +126,9 @@ function LoginForm() {
                   id="password"
                   type="password"
                   placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
                   className="shadow-input block w-full rounded-md border-0 bg-white px-4 py-1.5 text-black placeholder:text-gray-400 focus:ring-2 focus:ring-neutral-400 focus:outline-none sm:text-sm sm:leading-6 dark:bg-neutral-900 dark:text-white"
                 />
               </div>
@@ -76,9 +137,10 @@ function LoginForm() {
             <div>
               <button
                 type="submit"
-                className="relative z-10 flex w-full cursor-pointer items-center justify-center rounded-full bg-black px-4 py-2 text-sm font-medium text-white transition duration-200 hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-neutral-100 dark:hover:shadow-xl"
+                disabled={loading}
+                className="relative z-10 flex w-full cursor-pointer items-center justify-center rounded-full bg-black px-4 py-2 text-sm font-medium text-white transition duration-200 hover:bg-black/90 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-neutral-100 dark:hover:shadow-xl"
               >
-                로그인
+                {loading ? "로그인 중..." : "로그인"}
               </button>
               <p
                 className={cn(
@@ -114,13 +176,17 @@ function LoginForm() {
             <div className="mt-6 flex w-full flex-col gap-3">
               <button
                 type="button"
-                className="relative z-10 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#FEE500] px-4 py-2 text-sm font-semibold text-[#191919] transition duration-200 hover:bg-[#FDD835]"
+                onClick={() => handleOAuthLogin("kakao")}
+                disabled={loading}
+                className="relative z-10 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#FEE500] px-4 py-2 text-sm font-semibold text-[#191919] transition duration-200 hover:bg-[#FDD835] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 카카오 로그인
               </button>
               <button
                 type="button"
-                className="relative z-10 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#03C75A] px-4 py-2 text-sm font-semibold text-white transition duration-200 hover:bg-[#02b351]"
+                onClick={handleNaverLogin}
+                disabled={loading}
+                className="relative z-10 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#03C75A] px-4 py-2 text-sm font-semibold text-white transition duration-200 hover:bg-[#02b351] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 네이버 로그인
               </button>

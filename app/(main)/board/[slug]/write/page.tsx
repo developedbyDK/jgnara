@@ -3,16 +3,12 @@ import Link from "next/link";
 import { CategorySidebar } from "@/components/layout/category-sidebar";
 import { BannerAside } from "@/components/layout/banner-aside";
 import { BoardWriteForm } from "@/components/board/board-write-form";
-import { BOARD_CONFIGS, getAllBoardSlugs } from "@/lib/board-config";
+import { BOARD_CONFIGS } from "@/lib/board-config";
 import type { Metadata } from "next";
 
 type Props = {
   params: Promise<{ slug: string }>;
 };
-
-export async function generateStaticParams() {
-  return getAllBoardSlugs().map((slug) => ({ slug }));
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -78,6 +74,7 @@ export default async function BoardSlugWritePage({ params }: Props) {
         {/* Form */}
         <div className="mt-6">
           <BoardWriteForm
+            boardSlug={slug}
             categories={writeCategories}
             backUrl={`/board/${slug}`}
           />

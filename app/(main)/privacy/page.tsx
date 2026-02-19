@@ -5,7 +5,8 @@ import { PrivacyContent } from "@/components/legal/privacy-content";
 
 export const metadata = {
   title: "개인정보처리방침 - 중기나라",
-  description: "중기나라 개인정보처리방침 - 개인정보보호법에 따른 개인정보 처리 및 보호에 관한 사항",
+  description:
+    "중기나라 개인정보처리방침 - 개인정보보호법에 따른 개인정보 처리 및 보호에 관한 사항",
 };
 
 export default function PrivacyPage() {

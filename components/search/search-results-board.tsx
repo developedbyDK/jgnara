@@ -9,7 +9,7 @@ import {
   gradeStyle,
   type ListingItem,
 } from "@/lib/constants/mock-listings";
-import { CATEGORIES } from "@/lib/constants/categories";
+import { useCategories } from "@/lib/use-categories";
 import { REGION_OPTIONS } from "@/lib/constants/listing-options";
 import {
   IconSearch,
@@ -37,6 +37,7 @@ interface SearchResultsBoardProps {
 }
 
 export function SearchResultsBoard({ query }: SearchResultsBoardProps) {
+  const { allTree } = useCategories();
   const [selectedCategory, setSelectedCategory] = useState("전체");
   const [selectedRegion, setSelectedRegion] = useState("전체");
   const [sortBy, setSortBy] = useState("latest");
@@ -125,7 +126,7 @@ export function SearchResultsBoard({ query }: SearchResultsBoardProps) {
           >
             전체
           </button>
-          {CATEGORIES.map((cat) => (
+          {allTree.map((cat) => (
             <button
               key={cat.slug}
               onClick={() => handleCategoryChange(cat.slug)}

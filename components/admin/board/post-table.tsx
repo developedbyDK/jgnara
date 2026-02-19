@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Search, MoreHorizontal, Eye, EyeOff, Trash2, Pin } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -28,36 +29,63 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MOCK_POSTS, getStatusColor } from "@/lib/constants/mock-admin";
+import { type AdminBoardPost } from "@/lib/admin-board-queries";
+import { updatePostStatus } from "@/lib/admin-board-actions";
 
 const ITEMS_PER_PAGE = 10;
 
-export function PostTable() {
+function getStatusColor(status: string) {
+  switch (status) {
+    case "게시중":
+      return "text-green-700 bg-green-100 dark:bg-green-900/30 dark:text-green-400";
+    case "숨김":
+      return "text-yellow-700 bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-400";
+    case "삭제":
+      return "text-red-700 bg-red-100 dark:bg-red-900/30 dark:text-red-400";
+    default:
+      return "";
+  }
+}
+
+interface PostTableProps {
+  posts: AdminBoardPost[];
+}
+
+export function PostTable({ posts }: PostTableProps) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [boardFilter, setBoardFilter] = useState<string>("all");
   const [page, setPage] = useState(1);
 
   const boards = useMemo(
-    () => [...new Set(MOCK_POSTS.map((p) => p.board))],
-    []
+    () => [...new Set(posts.map((p) => p.boardTitle))].sort(),
+    [posts]
   );
 
   const filtered = useMemo(() => {
-    return MOCK_POSTS.filter((post) => {
+    return posts.filter((post) => {
       const matchSearch =
         !search ||
         post.title.includes(search) ||
         post.author.includes(search) ||
-        post.id.includes(search);
+        String(post.id).includes(search);
       const matchStatus = statusFilter === "all" || post.status === statusFilter;
-      const matchBoard = boardFilter === "all" || post.board === boardFilter;
+      const matchBoard = boardFilter === "all" || post.boardTitle === boardFilter;
       return matchSearch && matchStatus && matchBoard;
     });
-  }, [search, statusFilter, boardFilter]);
+  }, [posts, search, statusFilter, boardFilter]);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paged = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+
+  async function handleStatusChange(id: number, newStatus: string) {
+    startTransition(async () => {
+      await updatePostStatus(id, newStatus);
+      router.refresh();
+    });
+  }
 
   return (
     <div className="space-y-4">
@@ -73,11 +101,11 @@ export function PostTable() {
         </div>
         <div className="flex gap-2">
           <Select value={boardFilter} onValueChange={(v) => { setBoardFilter(v); setPage(1); }}>
-            <SelectTrigger className="w-28 cursor-pointer">
+            <SelectTrigger className="w-36 cursor-pointer">
               <SelectValue placeholder="게시판" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all" className="cursor-pointer">전체</SelectItem>
+              <SelectItem value="all" className="cursor-pointer">전체 게시판</SelectItem>
               {boards.map((b) => (
                 <SelectItem key={b} value={b} className="cursor-pointer">{b}</SelectItem>
               ))}
@@ -114,21 +142,21 @@ export function PostTable() {
           </TableHeader>
           <TableBody>
             {paged.map((post) => (
-              <TableRow key={post.id} className={post.isNotice ? "bg-muted/30" : ""}>
+              <TableRow key={post.id} className={post.isPinned ? "bg-muted/30" : ""}>
                 <TableCell className="font-mono text-xs">{post.id}</TableCell>
                 <TableCell className="font-medium max-w-[250px] truncate">
                   <Link
                     href={`/hs-ctrl-x7k9m/board/${post.id}`}
                     className="hover:underline cursor-pointer"
                   >
-                    {post.isNotice && (
+                    {post.isPinned && (
                       <Pin className="inline-block size-3 mr-1 text-primary" />
                     )}
                     {post.title}
                   </Link>
                 </TableCell>
                 <TableCell className="hidden md:table-cell text-sm">
-                  <Badge variant="outline" className="text-[11px]">{post.board}</Badge>
+                  <Badge variant="outline" className="text-[11px]">{post.boardTitle}</Badge>
                 </TableCell>
                 <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
                   {post.author}
@@ -150,7 +178,7 @@ export function PostTable() {
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="size-8 cursor-pointer">
+                      <Button variant="ghost" size="icon" className="size-8 cursor-pointer" disabled={isPending}>
                         <MoreHorizontal className="size-4" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -161,12 +189,25 @@ export function PostTable() {
                           상세보기
                         </Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer">
-                        <EyeOff className="mr-2 size-4" />
-                        {post.status === "숨김" ? "게시 복원" : "숨김 처리"}
-                      </DropdownMenuItem>
+                      {post.status !== "삭제" && (
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={() =>
+                            handleStatusChange(
+                              post.id,
+                              post.status === "숨김" ? "게시중" : "숨김"
+                            )
+                          }
+                        >
+                          <EyeOff className="mr-2 size-4" />
+                          {post.status === "숨김" ? "게시 복원" : "숨김 처리"}
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem className="cursor-pointer text-red-600">
+                      <DropdownMenuItem
+                        className="cursor-pointer text-red-600"
+                        onClick={() => handleStatusChange(post.id, "삭제")}
+                      >
                         <Trash2 className="mr-2 size-4" />
                         삭제
                       </DropdownMenuItem>

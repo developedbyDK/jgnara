@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { Search, MoreHorizontal, Eye, CheckCircle, XCircle, Trash2 } from "lucide-react";
+import { useState, useMemo, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { Search, MoreHorizontal, Eye, XCircle, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,17 +28,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MOCK_RECRUITS, getStatusColor } from "@/lib/constants/mock-admin";
+import { type AdminRecruitView, type RecruitStatus } from "@/lib/recruit-queries";
+import { updateRecruitStatus, deleteRecruit } from "@/lib/recruit-actions";
+import { getStatusColor } from "@/lib/constants/mock-admin";
 
 const ITEMS_PER_PAGE = 10;
 
-export function RecruitTable() {
+interface RecruitTableProps {
+  recruits: AdminRecruitView[];
+}
+
+export function RecruitTable({ recruits }: RecruitTableProps) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [page, setPage] = useState(1);
 
   const filtered = useMemo(() => {
-    return MOCK_RECRUITS.filter((recruit) => {
+    return recruits.filter((recruit) => {
       const matchSearch =
         !search ||
         recruit.title.includes(search) ||
@@ -46,10 +55,28 @@ export function RecruitTable() {
       const matchStatus = statusFilter === "all" || recruit.status === statusFilter;
       return matchSearch && matchStatus;
     });
-  }, [search, statusFilter]);
+  }, [recruits, search, statusFilter]);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paged = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+
+  const handleStatusChange = (id: string, status: string) => {
+    startTransition(async () => {
+      const result = await updateRecruitStatus(id, status);
+      if (result.success) {
+        router.refresh();
+      }
+    });
+  };
+
+  const handleDelete = (id: string) => {
+    startTransition(async () => {
+      const result = await deleteRecruit(id);
+      if (result.success) {
+        router.refresh();
+      }
+    });
+  };
 
   return (
     <div className="space-y-4">
@@ -80,7 +107,6 @@ export function RecruitTable() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-20">ID</TableHead>
               <TableHead>제목</TableHead>
               <TableHead className="hidden md:table-cell">업체</TableHead>
               <TableHead className="hidden md:table-cell">지역</TableHead>
@@ -94,8 +120,7 @@ export function RecruitTable() {
           </TableHeader>
           <TableBody>
             {paged.map((recruit) => (
-              <TableRow key={recruit.id}>
-                <TableCell className="font-mono text-xs">{recruit.id}</TableCell>
+              <TableRow key={recruit.id} className={isPending ? "opacity-50" : ""}>
                 <TableCell className="font-medium max-w-[200px] truncate">
                   {recruit.title}
                 </TableCell>
@@ -125,7 +150,7 @@ export function RecruitTable() {
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="size-8 cursor-pointer">
+                      <Button variant="ghost" size="icon" className="size-8 cursor-pointer" disabled={isPending}>
                         <MoreHorizontal className="size-4" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -135,13 +160,19 @@ export function RecruitTable() {
                         상세보기
                       </DropdownMenuItem>
                       {recruit.status === "모집중" && (
-                        <DropdownMenuItem className="cursor-pointer">
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={() => handleStatusChange(recruit.id, "마감")}
+                        >
                           <XCircle className="mr-2 size-4" />
                           마감 처리
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem className="cursor-pointer text-red-600">
+                      <DropdownMenuItem
+                        className="cursor-pointer text-red-600"
+                        onClick={() => handleDelete(recruit.id)}
+                      >
                         <Trash2 className="mr-2 size-4" />
                         삭제
                       </DropdownMenuItem>
@@ -152,7 +183,7 @@ export function RecruitTable() {
             ))}
             {paged.length === 0 && (
               <TableRow>
-                <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={9} className="h-24 text-center text-muted-foreground">
                   검색 결과가 없습니다.
                 </TableCell>
               </TableRow>

@@ -2,11 +2,8 @@ import Link from "next/link";
 import { CategorySidebar } from "@/components/layout/category-sidebar";
 import { BannerAside } from "@/components/layout/banner-aside";
 import { BOARD_CONFIGS } from "@/lib/board-config";
-import {
-  IconChevronRight,
-  IconMessage,
-  IconEye,
-} from "@tabler/icons-react";
+import { getBoardStats } from "@/lib/board-queries";
+import { IconChevronRight, IconMessage, IconEye } from "@tabler/icons-react";
 
 export const metadata = {
   title: "게시판 - 중기나라",
@@ -28,7 +25,9 @@ const GROUPS = [
   },
 ];
 
-export default function BoardIndexPage() {
+export default async function BoardIndexPage() {
+  const stats = await getBoardStats();
+
   return (
     <CategorySidebar aside={<BannerAside />}>
       <div className="p-4 sm:p-6">
@@ -68,13 +67,9 @@ export default function BoardIndexPage() {
                   const config = BOARD_CONFIGS[slug];
                   if (!config) return null;
 
-                  const totalPosts = config.mockPosts.filter(
-                    (p) => !p.isPinned,
-                  ).length;
-                  const totalViews = config.mockPosts.reduce(
-                    (sum, p) => sum + p.views,
-                    0,
-                  );
+                  const boardStats = stats[slug];
+                  const totalPosts = boardStats?.post_count ?? 0;
+                  const totalViews = boardStats?.total_views ?? 0;
 
                   return (
                     <Link

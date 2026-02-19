@@ -28,17 +28,27 @@ import {
   IconX,
   IconChevronRight,
   IconChevronDown,
+  IconTruckDelivery,
+  IconSnowflake,
+  IconTir,
+  IconCarCrane,
+  IconLadder,
+  IconBarrel,
+  IconBus,
+  IconCamper,
 } from "@tabler/icons-react";
-import { CATEGORIES } from "@/lib/constants/categories";
 import {
   MobileBannerCarousel,
   MobileBannerGrid,
 } from "@/components/layout/mobile-banner";
+import { useCategories } from "@/lib/use-categories";
+import type { CategoryTreeNode } from "@/lib/category-queries";
 
 // ─── Types ───────────────────────────────────────────
 interface CategoryLink {
   label: string;
   href: string;
+  slug: string;
   icon: React.ReactNode;
   subcategories: { label: string; href: string }[];
 }
@@ -64,17 +74,31 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   crusher: <IconBuildingFactory2 className={iconClass} />,
   compressor: <IconHammer className={iconClass} />,
   etc: <IconTool className={iconClass} />,
+  "cargo-transport": <IconTruckDelivery className={iconClass} />,
+  "freight-dump": <IconTruck className={iconClass} />,
+  "refrigerated-wing": <IconSnowflake className={iconClass} />,
+  "freight-trailer": <IconTir className={iconClass} />,
+  wrecker: <IconCarCrane className={iconClass} />,
+  "ladder-truck": <IconLadder className={iconClass} />,
+  tanker: <IconBarrel className={iconClass} />,
+  bus: <IconBus className={iconClass} />,
+  "special-vehicle": <IconCamper className={iconClass} />,
 };
 
-const categories: CategoryLink[] = CATEGORIES.map((cat) => ({
-  label: cat.label,
-  href: cat.href,
-  icon: CATEGORY_ICONS[cat.slug] ?? <IconTool className={iconClass} />,
-  subcategories: cat.subcategories.map((sub) => ({
-    label: sub.label,
-    href: sub.href,
-  })),
-}));
+function mapTreeToLinks(nodes: CategoryTreeNode[]): CategoryLink[] {
+  return nodes.map((node) => ({
+    label: node.label,
+    href: `/category/${node.slug}`,
+    slug: node.slug,
+    icon: CATEGORY_ICONS[node.icon_key ?? node.slug] ?? (
+      <IconTool className={iconClass} />
+    ),
+    subcategories: node.children.map((child) => ({
+      label: child.label,
+      href: `/category/${node.slug}/${child.slug}`,
+    })),
+  }));
+}
 
 // ─── Context ─────────────────────────────────────────
 const SidebarContext = createContext<SidebarContextProps | undefined>(
@@ -142,14 +166,21 @@ const SidebarLink = ({
 };
 
 // ─── Desktop Sidebar ─────────────────────────────────
-const DesktopSidebar = () => {
+const DesktopSidebar = ({
+  heavyCategories,
+  freightCategories,
+}: {
+  heavyCategories: CategoryLink[];
+  freightCategories: CategoryLink[];
+}) => {
   const { open, setOpen } = useSidebar();
   const sidebarRef = useRef<HTMLDivElement>(null);
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [flyoutTop, setFlyoutTop] = useState(0);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const hoveredData = categories.find((c) => c.href === hoveredCategory);
+  const allCategories = [...heavyCategories, ...freightCategories];
+  const hoveredData = allCategories.find((c) => c.href === hoveredCategory);
 
   const clearCloseTimer = useCallback(() => {
     if (closeTimer.current) {
@@ -223,7 +254,34 @@ const DesktopSidebar = () => {
 
       {/* Category links */}
       <nav className="mt-3 flex flex-1 flex-col gap-0.5 overflow-x-hidden overflow-y-auto">
-        {categories.map((cat) => (
+        {heavyCategories.map((cat) => (
+          <SidebarLink
+            key={cat.href}
+            link={cat}
+            onHover={handleHover}
+            isHovered={hoveredCategory === cat.href}
+          />
+        ))}
+
+        {/* 화물특장 섹션 */}
+        <div className="mt-3 mb-1 h-px w-full bg-white/15" />
+        <div className="px-2.5 py-1.5">
+          {open ? (
+            <motion.h2
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-base font-bold text-white whitespace-pre"
+            >
+              화물특장 카테고리
+            </motion.h2>
+          ) : (
+            <div className="flex justify-center">
+              <IconTruckDelivery className="h-5 w-5 text-white" />
+            </div>
+          )}
+        </div>
+
+        {freightCategories.map((cat) => (
           <SidebarLink
             key={cat.href}
             link={cat}
@@ -262,7 +320,13 @@ const DesktopSidebar = () => {
 };
 
 // ─── Mobile Sidebar ──────────────────────────────────
-const MobileSidebar = () => {
+const MobileSidebar = ({
+  heavyCategories,
+  freightCategories,
+}: {
+  heavyCategories: CategoryLink[];
+  freightCategories: CategoryLink[];
+}) => {
   const [open, setOpen] = useState(false);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
 
@@ -318,7 +382,7 @@ const MobileSidebar = () => {
               <div className="h-px w-full bg-white/15" />
 
               <nav className="mt-3 flex flex-col gap-0.5 overflow-y-auto">
-                {categories.map((cat) => (
+                {heavyCategories.map((cat) => (
                   <div key={cat.href}>
                     <div className="flex items-center">
                       <Link
@@ -367,6 +431,25 @@ const MobileSidebar = () => {
                     </AnimatePresence>
                   </div>
                 ))}
+
+                {/* 화물특장 섹션 */}
+                <div className="mt-3 mb-1 h-px w-full bg-white/15" />
+                <h2 className="px-2.5 py-1.5 text-base font-bold text-white">
+                  화물특장 카테고리
+                </h2>
+
+                {freightCategories.map((cat) => (
+                  <div key={cat.href}>
+                    <Link
+                      href={cat.href}
+                      onClick={() => setOpen(false)}
+                      className="flex flex-1 cursor-pointer items-center gap-2.5 px-2.5 py-2.5 text-base text-white transition hover:bg-white/10"
+                    >
+                      {cat.icon}
+                      {cat.label}
+                    </Link>
+                  </div>
+                ))}
               </nav>
             </motion.div>
           </>
@@ -385,13 +468,23 @@ export function CategorySidebar({
   aside?: React.ReactNode;
 }) {
   const [open, setOpen] = useState(true);
+  const { heavyTree, freightTree } = useCategories();
+
+  const heavyCategories = mapTreeToLinks(heavyTree);
+  const freightCategories = mapTreeToLinks(freightTree);
 
   return (
     <SidebarContext.Provider value={{ open, setOpen }}>
       <div className="mx-auto flex h-[calc(100dvh-var(--header-h))] w-full max-w-7xl">
-        <DesktopSidebar />
+        <DesktopSidebar
+          heavyCategories={heavyCategories}
+          freightCategories={freightCategories}
+        />
         <div className="flex flex-1 flex-col overflow-hidden">
-          <MobileSidebar />
+          <MobileSidebar
+            heavyCategories={heavyCategories}
+            freightCategories={freightCategories}
+          />
           {/* Mobile top banner carousel */}
           {aside && <MobileBannerCarousel />}
           <div className="flex flex-1 gap-2 overflow-hidden py-2">

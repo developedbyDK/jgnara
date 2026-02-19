@@ -1,33 +1,39 @@
-"use client";
-
 import {
   UserPlus,
   Package,
   MessageSquare,
-  HelpCircle,
   Building2,
-  AlertTriangle,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { RECENT_ACTIVITIES, type RecentActivity } from "@/lib/constants/mock-admin";
+import type { RecentActivity } from "@/lib/dashboard-queries";
 
-const ICON_MAP: Record<RecentActivity["type"], { icon: typeof UserPlus; color: string }> = {
-  "회원가입": { icon: UserPlus, color: "text-blue-500" },
-  "매물등록": { icon: Package, color: "text-green-500" },
-  "게시글": { icon: MessageSquare, color: "text-purple-500" },
-  "문의": { icon: HelpCircle, color: "text-cyan-500" },
-  "업체등록": { icon: Building2, color: "text-amber-500" },
-  "신고": { icon: AlertTriangle, color: "text-red-500" },
+const ICON_MAP: Record<
+  RecentActivity["type"],
+  { icon: typeof UserPlus; color: string }
+> = {
+  회원가입: { icon: UserPlus, color: "text-blue-500" },
+  매물등록: { icon: Package, color: "text-green-500" },
+  게시글: { icon: MessageSquare, color: "text-purple-500" },
+  업체등록: { icon: Building2, color: "text-amber-500" },
 };
 
-export function RecentActivityFeed() {
+interface RecentActivityFeedProps {
+  activities: RecentActivity[];
+}
+
+export function RecentActivityFeed({ activities }: RecentActivityFeedProps) {
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-base">최근 활동</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {RECENT_ACTIVITIES.map((activity) => {
+        {activities.length === 0 && (
+          <p className="text-sm text-muted-foreground text-center py-4">
+            최근 활동이 없습니다.
+          </p>
+        )}
+        {activities.map((activity) => {
           const { icon: Icon, color } = ICON_MAP[activity.type];
           return (
             <div

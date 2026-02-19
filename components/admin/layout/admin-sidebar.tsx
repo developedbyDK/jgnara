@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import {
   LayoutDashboard,
   Users,
@@ -9,11 +10,17 @@ import {
   MessageSquare,
   Building2,
   Briefcase,
+  FileText,
+  Mail,
   Image,
   FolderTree,
+  Coins,
+  HelpCircle,
   ChevronUp,
   LogOut,
   Settings,
+  Megaphone,
+  ShoppingCart,
 } from "lucide-react";
 import {
   Sidebar,
@@ -54,19 +61,37 @@ const NAV_GROUPS = [
       { title: "게시판관리", href: `${BASE}/board`, icon: MessageSquare },
       { title: "업체관리", href: `${BASE}/companies`, icon: Building2 },
       { title: "채용관리", href: `${BASE}/recruit`, icon: Briefcase },
+      { title: "주요양식관리", href: `${BASE}/forms`, icon: FileText },
+      { title: "문의관리", href: `${BASE}/contacts`, icon: Mail },
+      { title: "FAQ관리", href: `${BASE}/faqs`, icon: HelpCircle },
     ],
   },
   {
     label: "설정",
     items: [
+      { title: "포인트관리", href: `${BASE}/credits`, icon: Coins },
+      { title: "광고상품관리", href: `${BASE}/ad-products`, icon: Megaphone },
+      { title: "광고구매관리", href: `${BASE}/ad-purchases`, icon: ShoppingCart },
       { title: "배너관리", href: `${BASE}/banners`, icon: Image },
       { title: "카테고리관리", href: `${BASE}/categories`, icon: FolderTree },
     ],
   },
 ];
 
-export function AdminSidebar() {
+interface AdminSidebarProps {
+  user: { email: string };
+}
+
+export function AdminSidebar({ user }: AdminSidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  async function handleSignOut() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/hs-ctrl-x7k9m/login");
+    router.refresh();
+  }
 
   function isActive(href: string) {
     if (href === BASE) return pathname === BASE;
@@ -76,15 +101,12 @@ export function AdminSidebar() {
   return (
     <Sidebar collapsible="icon" className="border-r">
       <SidebarHeader className="h-14 flex-row items-center border-b px-4">
-        <Link
-          href={BASE}
-          className="flex items-center gap-2 cursor-pointer"
-        >
+        <Link href={BASE} className="flex items-center gap-2 cursor-pointer">
           <div className="flex h-7 w-7 items-center justify-center rounded bg-primary text-primary-foreground text-xs font-bold">
             중
           </div>
           <span className="text-sm font-semibold group-data-[collapsible=icon]:hidden">
-            중기in 관리자
+            중기나라 관리자
           </span>
         </Link>
       </SidebarHeader>
@@ -104,10 +126,7 @@ export function AdminSidebar() {
                       isActive={isActive(item.href)}
                       tooltip={item.title}
                     >
-                      <Link
-                        href={item.href}
-                        className="cursor-pointer"
-                      >
+                      <Link href={item.href} className="cursor-pointer">
                         <item.icon className="size-4" />
                         <span>{item.title}</span>
                       </Link>
@@ -125,10 +144,7 @@ export function AdminSidebar() {
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuButton
-                  size="lg"
-                  className="cursor-pointer"
-                >
+                <SidebarMenuButton size="lg" className="cursor-pointer">
                   <Avatar className="h-7 w-7">
                     <AvatarFallback className="bg-primary text-primary-foreground text-xs">
                       관
@@ -136,8 +152,8 @@ export function AdminSidebar() {
                   </Avatar>
                   <div className="flex flex-col gap-0.5 leading-none group-data-[collapsible=icon]:hidden">
                     <span className="text-xs font-semibold">관리자</span>
-                    <span className="text-[10px] text-muted-foreground">
-                      admin@jungki.in
+                    <span className="text-[10px] text-muted-foreground truncate max-w-[140px]">
+                      {user.email}
                     </span>
                   </div>
                   <ChevronUp className="ml-auto size-4 group-data-[collapsible=icon]:hidden" />
@@ -153,7 +169,10 @@ export function AdminSidebar() {
                   설정
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer text-red-600">
+                <DropdownMenuItem
+                  className="cursor-pointer text-red-600"
+                  onClick={handleSignOut}
+                >
                   <LogOut className="mr-2 size-4" />
                   로그아웃
                 </DropdownMenuItem>

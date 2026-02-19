@@ -3,16 +3,11 @@ import Link from "next/link";
 import { CategorySidebar } from "@/components/layout/category-sidebar";
 import { BannerAside } from "@/components/layout/banner-aside";
 import {
-  getListingById,
-  getRelatedListings,
-  MOCK_LISTINGS,
-} from "@/lib/constants/mock-listings";
+  getPublicListingDetail,
+  getRelatedListingsPublic,
+} from "@/lib/listing-queries";
 import { ListingDetailContent } from "@/components/listings/listing-detail-content";
 import { RelatedListings } from "@/components/listings/related-listings";
-
-export function generateStaticParams() {
-  return MOCK_LISTINGS.map((l) => ({ id: String(l.id) }));
-}
 
 export async function generateMetadata({
   params,
@@ -20,11 +15,11 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const listing = getListingById(Number(id));
+  const listing = await getPublicListingDetail(id);
   if (!listing) return {};
   return {
     title: `${listing.title} - 중기나라`,
-    description: `${listing.title} ${listing.priceLabel} ${listing.region} ${listing.year}년식`,
+    description: `${listing.title} ${listing.price} ${listing.region} ${listing.year}년식`,
   };
 }
 
@@ -34,13 +29,13 @@ export default async function ListingDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const listing = getListingById(Number(id));
+  const listing = await getPublicListingDetail(id);
 
   if (!listing) {
     notFound();
   }
 
-  const related = getRelatedListings(listing, 4);
+  const related = await getRelatedListingsPublic(listing.category, listing.id);
 
   return (
     <CategorySidebar aside={<BannerAside />}>
@@ -55,7 +50,7 @@ export default async function ListingDetailPage({
           </Link>
           <span>/</span>
           <Link
-            href={`/category/${listing.categorySlug}`}
+            href={`/category/${encodeURIComponent(listing.category)}`}
             className="cursor-pointer transition hover:text-neutral-900 dark:hover:text-neutral-200"
           >
             {listing.category}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useActionState } from "react";
 import { useRouter } from "next/navigation";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -14,50 +15,47 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { BoardImageUpload } from "@/components/board/board-image-upload";
+import { createBoardPost } from "@/lib/board-actions";
 
 const DEFAULT_CATEGORIES = ["잡담", "질문", "정보공유", "후기", "기타"];
 
-interface FormData {
-  title: string;
-  category: string;
-  author: string;
-  password: string;
-  content: string;
-}
-
-const initialFormData: FormData = {
-  title: "",
-  category: "",
-  author: "",
-  password: "",
-  content: "",
-};
-
 interface BoardWriteFormProps {
+  boardSlug: string;
   categories?: string[];
   backUrl?: string;
 }
 
 export function BoardWriteForm({
+  boardSlug,
   categories = DEFAULT_CATEGORIES,
   backUrl = "/board",
 }: BoardWriteFormProps) {
   const router = useRouter();
-  const [formData, setFormData] = useState<FormData>(initialFormData);
-
-  function updateField(field: keyof FormData, value: string) {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  }
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    // TODO: submit logic
-    console.log({ formData });
-    router.push(backUrl);
-  }
+  const [images, setImages] = useState<string[]>([]);
+  const [state, formAction, isPending] = useActionState(
+    async (_prev: { success: boolean; message: string } | null, formData: FormData) => {
+      // 이미지 URL을 formData에 추가
+      for (const url of images) {
+        formData.append("images", url);
+      }
+      const result = await createBoardPost(formData);
+      return result ?? null;
+    },
+    null,
+  );
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form action={formAction} className="space-y-6">
+      <input type="hidden" name="boardSlug" value={boardSlug} />
+
+      {/* 에러 메시지 */}
+      {state && !state.success && (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/30 dark:bg-red-900/10 dark:text-red-400">
+          {state.message}
+        </div>
+      )}
+
       {/* ── 게시글 정보 ── */}
       <section>
         <h2 className="mb-4 text-base font-semibold">게시글 정보</h2>
@@ -65,18 +63,15 @@ export function BoardWriteForm({
           <Field className="sm:col-span-2">
             <FieldLabel>제목</FieldLabel>
             <Input
-              value={formData.title}
-              onChange={(e) => updateField("title", e.target.value)}
+              name="title"
               placeholder="제목을 입력하세요"
+              required
             />
           </Field>
 
           <Field>
             <FieldLabel>분류</FieldLabel>
-            <Select
-              value={formData.category}
-              onValueChange={(v) => updateField("category", v)}
-            >
+            <Select name="category" required>
               <SelectTrigger>
                 <SelectValue placeholder="분류 선택" />
               </SelectTrigger>
@@ -101,9 +96,9 @@ export function BoardWriteForm({
           <Field>
             <FieldLabel>작성자</FieldLabel>
             <Input
-              value={formData.author}
-              onChange={(e) => updateField("author", e.target.value)}
+              name="author"
               placeholder="닉네임을 입력하세요"
+              required
             />
           </Field>
 
@@ -111,8 +106,7 @@ export function BoardWriteForm({
             <FieldLabel>비밀번호</FieldLabel>
             <Input
               type="password"
-              value={formData.password}
-              onChange={(e) => updateField("password", e.target.value)}
+              name="password"
               placeholder="수정/삭제 시 필요합니다"
             />
           </Field>
@@ -124,15 +118,20 @@ export function BoardWriteForm({
       {/* ── 내용 ── */}
       <section>
         <h2 className="mb-4 text-base font-semibold">내용</h2>
-        <FieldGroup>
+        <FieldGroup className="space-y-5">
           <Field>
             <FieldLabel>본문</FieldLabel>
             <Textarea
-              value={formData.content}
-              onChange={(e) => updateField("content", e.target.value)}
+              name="content"
               placeholder="내용을 입력하세요"
               className="min-h-48"
+              required
             />
+          </Field>
+
+          <Field>
+            <FieldLabel>이미지 첨부</FieldLabel>
+            <BoardImageUpload images={images} onChange={setImages} />
           </Field>
         </FieldGroup>
       </section>
@@ -144,11 +143,12 @@ export function BoardWriteForm({
           variant="outline"
           className="cursor-pointer px-6"
           onClick={() => router.push(backUrl)}
+          disabled={isPending}
         >
           취소
         </Button>
-        <Button type="submit" className="cursor-pointer px-8">
-          등록하기
+        <Button type="submit" className="cursor-pointer px-8" disabled={isPending}>
+          {isPending ? "등록 중..." : "등록하기"}
         </Button>
       </div>
     </form>
