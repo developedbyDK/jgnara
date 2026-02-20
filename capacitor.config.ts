@@ -5,11 +5,11 @@ const config: CapacitorConfig = {
   appName: "중기나라",
   webDir: "out",
   server: {
-    url: process.env.NEXT_PUBLIC_APP_URL || "https://joonggiin.com",
+    url: process.env.NEXT_PUBLIC_APP_URL || "https://jonnggi.com",
     cleartext: false,
     allowNavigation: [
-      "joonggiin.com",
-      "*.joonggiin.com",
+      "jonnggi.com",
+      "*.jonnggi.com",
       "*.supabase.co",
       "*.kakao.com",
       "*.google.com",
