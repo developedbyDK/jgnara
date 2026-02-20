@@ -1,5 +1,12 @@
 "use client";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -107,6 +114,7 @@ const navItems: NavItem[] = [
 export function Header() {
   const headerRef = React.useRef<HTMLDivElement>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [bookmarkOpen, setBookmarkOpen] = useState(false);
   const [visitCounts, setVisitCounts] = useState<{
     today: number;
     total: number;
@@ -151,18 +159,43 @@ export function Header() {
   }, []);
 
   return (
-    <div ref={headerRef} className="sticky top-0 z-50 w-full">
+    <div ref={headerRef} className="sticky top-0 z-50 w-full pt-safe">
       {/* Utility bar */}
       <div className="border-b border-neutral-200 bg-neutral-900 dark:border-neutral-800 dark:bg-black">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-1.5">
           <div className="flex items-center gap-4 text-xs text-neutral-400">
-            <Link
-              href="/favorites"
+            <button
+              type="button"
+              onClick={() => setBookmarkOpen(true)}
               className="flex cursor-pointer items-center gap-1 transition hover:text-white"
             >
               <IconStar className="h-3.5 w-3.5" />
               <span>즐겨찾기</span>
-            </Link>
+            </button>
+            <Dialog open={bookmarkOpen} onOpenChange={setBookmarkOpen}>
+              <DialogContent className="max-w-sm">
+                <DialogHeader>
+                  <DialogTitle>즐겨찾기 추가</DialogTitle>
+                  <DialogDescription>
+                    아래 단축키를 사용하여 즐겨찾기에 추가하세요.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="flex flex-col gap-2 pt-2 text-sm text-neutral-600 dark:text-neutral-300">
+                  <div className="flex items-center gap-2">
+                    <kbd className="rounded border border-neutral-300 bg-neutral-100 px-2 py-0.5 font-mono text-xs dark:border-neutral-600 dark:bg-neutral-800">
+                      Ctrl + D
+                    </kbd>
+                    <span>Windows / Linux</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <kbd className="rounded border border-neutral-300 bg-neutral-100 px-2 py-0.5 font-mono text-xs dark:border-neutral-600 dark:bg-neutral-800">
+                      ⌘ + D
+                    </kbd>
+                    <span>Mac</span>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
             <span>|</span>
             <span>
               오늘{" "}

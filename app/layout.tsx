@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import GoogleAnalytics from "@/components/google-analytics";
+import { CapacitorInit } from "@/components/capacitor-init";
 import "./globals.css";
 
 const geistMono = Geist_Mono({
@@ -12,6 +13,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "중기나라 - 중장비 매매",
   description: "중장비 매매, 업체찾기, 일감찾기, 구인구직",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -31,6 +39,7 @@ export default function RootLayout({
       </head>
       <body className={`${geistMono.variable} antialiased`}>
         <GoogleAnalytics />
+        <CapacitorInit />
         {children}
         <Toaster richColors position="top-center" />
       </body>
