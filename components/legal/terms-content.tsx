@@ -363,11 +363,160 @@ export function TermsContent() {
             </ol>
           </Article>
 
-          {/* ═══ 제5장 기타 ═══ */}
-          <ChapterHeader title="제5장 기타" />
+          {/* ═══ 제5장 무형상품 환불규정 ═══ */}
+          <ChapterHeader title="제5장 무형상품 환불규정" />
 
           {/* 제14조 */}
-          <Article title="제14조 (저작권의 귀속 및 이용제한)">
+          <Article title="제14조 (무형상품의 정의)">
+            <p className={paragraph}>
+              회사가 제공하는 무형상품(디지털 상품)이란 다음 각 호의 서비스를
+              말합니다.
+            </p>
+            <ol className="mt-2 list-inside list-decimal space-y-2">
+              <li className={listItem}>
+                <strong>크레딧</strong>: 매물 끌어올리기, 프리미엄 매물 등록 등
+                사이트 내 유료 기능을 이용할 수 있는 전자적 지불수단
+              </li>
+              <li className={listItem}>
+                <strong>VIP 매물 서비스</strong>: 매물을 사이트 상단 또는 주요
+                영역에 우선 노출하는 유료 서비스
+              </li>
+              <li className={listItem}>
+                <strong>배너 광고</strong>: 사이트 내 지정된 영역에 광고를
+                게재하는 유료 서비스
+              </li>
+              <li className={listItem}>
+                기타 회사가 유료로 제공하는 디지털 콘텐츠 및 서비스
+              </li>
+            </ol>
+          </Article>
+
+          {/* 제15조 */}
+          <Article title="제15조 (청약철회 및 환불 조건)">
+            <ol className="list-inside list-decimal space-y-2">
+              <li className={listItem}>
+                이용자는 「전자상거래 등에서의 소비자보호에 관한 법률」에 따라
+                무형상품 구매일로부터 7일 이내에 청약철회를 할 수 있습니다.
+              </li>
+              <li className={listItem}>
+                다음 각 호의 경우 전액 환불이 가능합니다.
+                <ul className="mt-1.5 ml-5 list-inside list-disc space-y-1">
+                  <li className={listItem}>
+                    구매 후 7일 이내이며 해당 무형상품을 전혀 사용하지 않은
+                    경우
+                  </li>
+                  <li className={listItem}>
+                    구매한 무형상품의 내용이 표시·광고 내용과 다르거나 계약
+                    내용과 다르게 이행된 경우
+                  </li>
+                </ul>
+              </li>
+              <li className={listItem}>
+                크레딧을 일부 사용한 경우, 사용분을 차감한 잔여분에 대하여
+                환불이 가능합니다.
+              </li>
+              <li className={listItem}>
+                다음 각 호의 경우 환불이 불가합니다.
+                <ul className="mt-1.5 ml-5 list-inside list-disc space-y-1">
+                  <li className={listItem}>
+                    이미 노출이 완료되었거나 노출 중인 배너 광고
+                  </li>
+                  <li className={listItem}>
+                    사용이 완료된 크레딧 (끌어올리기, 프리미엄 등록 등에 사용
+                    완료)
+                  </li>
+                  <li className={listItem}>
+                    VIP 매물 서비스 이용이 개시되어 실제 노출이 이루어진 경우
+                  </li>
+                  <li className={listItem}>
+                    이용자의 귀책사유로 서비스 이용이 불가능한 경우
+                  </li>
+                  <li className={listItem}>
+                    구매일로부터 7일이 경과한 경우 (단, 미사용분에 한하여
+                    회사와 협의 가능)
+                  </li>
+                </ul>
+              </li>
+            </ol>
+          </Article>
+
+          {/* 제16조 */}
+          <Article title="제16조 (환불 절차)">
+            <ol className="list-inside list-decimal space-y-2">
+              <li className={listItem}>
+                환불을 신청하고자 하는 이용자는 고객센터(전화, 이메일) 또는
+                사이트 내 환불 신청 메뉴를 통해 환불을 요청할 수 있습니다.
+              </li>
+              <li className={listItem}>
+                회사는 환불 신청을 접수한 날로부터 3영업일 이내에 환불 가능
+                여부를 확인하여 이용자에게 통지합니다.
+              </li>
+              <li className={listItem}>
+                환불이 승인된 경우, 회사는 승인일로부터 7영업일 이내에 환불을
+                처리합니다.
+              </li>
+              <li className={listItem}>
+                회사는 환불 처리를 위해 이용자에게 필요한 정보(결제 내역, 사용
+                내역 등)를 요청할 수 있으며, 이용자는 이에 협조하여야 합니다.
+              </li>
+            </ol>
+          </Article>
+
+          {/* 제17조 */}
+          <Article title="제17조 (환불 방법)">
+            <ol className="list-inside list-decimal space-y-2">
+              <li className={listItem}>
+                환불은 원칙적으로 이용자가 결제한 수단과 동일한 방법으로
+                처리됩니다.
+              </li>
+              <li className={listItem}>
+                신용카드 결제의 경우 카드사 처리 기간에 따라 환불 완료까지 최대
+                5~7영업일이 소요될 수 있습니다.
+              </li>
+              <li className={listItem}>
+                계좌이체 결제의 경우 이용자가 지정한 환불 계좌로 3~5영업일
+                이내에 입금됩니다.
+              </li>
+              <li className={listItem}>
+                원결제 수단으로의 환불이 불가능한 경우, 회사는 이용자와
+                협의하여 대체 방법으로 환불할 수 있습니다.
+              </li>
+            </ol>
+          </Article>
+
+          {/* 제18조 */}
+          <Article title="제18조 (서비스 장애 시 보상)">
+            <ol className="list-inside list-decimal space-y-2">
+              <li className={listItem}>
+                회사의 귀책사유로 인하여 유료 서비스를 정상적으로 이용하지 못한
+                경우, 회사는 다음 각 호의 기준에 따라 보상합니다.
+                <ul className="mt-1.5 ml-5 list-inside list-disc space-y-1">
+                  <li className={listItem}>
+                    서비스 장애 시간이 24시간 미만인 경우: 장애 시간에 해당하는
+                    이용 기간 연장
+                  </li>
+                  <li className={listItem}>
+                    서비스 장애 시간이 24시간 이상인 경우: 장애 시간의 2배에
+                    해당하는 이용 기간 연장 또는 해당 금액 환불
+                  </li>
+                </ul>
+              </li>
+              <li className={listItem}>
+                천재지변, 전시, 사변 등 불가항력적인 사유로 인한 서비스 장애는
+                보상 대상에서 제외됩니다.
+              </li>
+              <li className={listItem}>
+                이용자의 귀책사유로 인한 서비스 이용 장애는 보상 대상에서
+                제외됩니다.
+              </li>
+            </ol>
+          </Article>
+
+          {/* ═══ 제6장 기타 ═══ */}
+          <ChapterHeader title="제6장 기타" />
+
+          {/* 제19조 */}
+          <Article title="제19조 (저작권의 귀속 및 이용제한)">
             <ol className="list-inside list-decimal space-y-2">
               <li className={listItem}>
                 회사가 작성한 저작물에 대한 저작권 기타 지적재산권은 회사에
@@ -388,8 +537,8 @@ export function TermsContent() {
             </ol>
           </Article>
 
-          {/* 제15조 */}
-          <Article title="제15조 (개인정보보호)">
+          {/* 제20조 */}
+          <Article title="제20조 (개인정보보호)">
             <p className={paragraph}>
               회사는 이용자의 개인정보를 보호하기 위해 「개인정보 보호법」 등
               관련 법령이 정하는 바를 준수합니다. 개인정보의 보호 및 사용에
@@ -404,8 +553,8 @@ export function TermsContent() {
             </p>
           </Article>
 
-          {/* 제16조 */}
-          <Article title="제16조 (분쟁해결)">
+          {/* 제21조 */}
+          <Article title="제21조 (분쟁해결)">
             <ol className="list-inside list-decimal space-y-2">
               <li className={listItem}>
                 회사는 이용자가 제기하는 정당한 의견이나 불만을 반영하고 그
