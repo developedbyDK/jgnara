@@ -12,10 +12,6 @@ export const metadata = {
 
 const GROUPS = [
   {
-    name: "매매",
-    slugs: ["buy", "sell", "plate-buy", "plate-sell"],
-  },
-  {
     name: "자격증/시험/취업",
     slugs: ["license-info", "license-review", "job-info"],
   },

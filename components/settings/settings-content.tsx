@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { createClient } from "@/lib/supabase/client";
+import { useAuthModal } from "@/components/auth/auth-modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -25,7 +26,6 @@ import {
   IconCheck,
   IconAlertTriangle,
 } from "@tabler/icons-react";
-import Link from "next/link";
 
 type UserInfo = {
   id: string;
@@ -33,6 +33,7 @@ type UserInfo = {
 };
 
 export function SettingsContent() {
+  const { openAuthModal } = useAuthModal();
   const [user, setUser] = useState<UserInfo | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -72,12 +73,13 @@ export function SettingsContent() {
             설정 페이지를 이용하려면 먼저 로그인해주세요.
           </p>
         </div>
-        <Link
-          href="/login"
+        <button
+          type="button"
+          onClick={() => openAuthModal("login")}
           className="cursor-pointer rounded-lg bg-orange-600 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-orange-700"
         >
           로그인하기
-        </Link>
+        </button>
       </div>
     );
   }

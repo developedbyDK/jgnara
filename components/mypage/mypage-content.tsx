@@ -10,7 +10,7 @@ import { CreditsTab } from "./credits-tab";
 import { MyRecruitsTab } from "./my-recruits-tab";
 import { CompanyTab } from "./company-tab";
 import { IconLogin } from "@tabler/icons-react";
-import Link from "next/link";
+import { useAuthModal } from "@/components/auth/auth-modal";
 
 type UserProfile = {
   id: string;
@@ -26,6 +26,7 @@ type UserProfile = {
 };
 
 export function MypageContent() {
+  const { openAuthModal } = useAuthModal();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasCompany, setHasCompany] = useState(false);
@@ -97,12 +98,13 @@ export function MypageContent() {
             마이페이지를 이용하려면 먼저 로그인해주세요.
           </p>
         </div>
-        <Link
-          href="/login"
+        <button
+          type="button"
+          onClick={() => openAuthModal("login")}
           className="cursor-pointer rounded-lg bg-orange-600 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-orange-700"
         >
           로그인하기
-        </Link>
+        </button>
       </div>
     );
   }

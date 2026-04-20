@@ -7,7 +7,7 @@ import {
   LayoutDashboard,
   Users,
   Package,
-  MessageSquare,
+
   Building2,
   Briefcase,
   FileText,
@@ -58,7 +58,7 @@ const NAV_GROUPS = [
   {
     label: "콘텐츠",
     items: [
-      { title: "게시판관리", href: `${BASE}/board`, icon: MessageSquare },
+
       { title: "업체관리", href: `${BASE}/companies`, icon: Building2 },
       { title: "채용관리", href: `${BASE}/recruit`, icon: Briefcase },
       { title: "주요양식관리", href: `${BASE}/forms`, icon: FileText },

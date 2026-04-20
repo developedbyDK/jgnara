@@ -71,11 +71,10 @@ const SERVICES = [
 ];
 
 const BOARD = [
-  { title: "매물 삽니다", href: "/board/buy" },
-  { title: "매물 팝니다", href: "/board/sell" },
-  { title: "번호판 삽니다", href: "/board/plate-buy" },
-  { title: "번호판 팝니다", href: "/board/plate-sell" },
   { title: "자유게시판", href: "/board/free" },
+  { title: "중장비자격증 정보공유", href: "/board/license-info" },
+  { title: "자격증 취득 후기", href: "/board/license-review" },
+  { title: "취업정보공유", href: "/board/job-info" },
 ];
 
 const SUPPORT = [

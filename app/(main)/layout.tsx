@@ -1,6 +1,7 @@
 import { ThemeProvider } from "next-themes";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { AuthModalProvider } from "@/components/auth/auth-modal";
 
 export default function MainLayout({
   children,
@@ -14,9 +15,11 @@ export default function MainLayout({
       enableSystem
       disableTransitionOnChange
     >
-      <Header />
-      <main>{children}</main>
-      <Footer />
+      <AuthModalProvider>
+        <Header />
+        <main>{children}</main>
+        <Footer />
+      </AuthModalProvider>
     </ThemeProvider>
   );
 }

@@ -32,6 +32,7 @@ import type { User } from "@supabase/supabase-js";
 
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useAuthModal } from "@/components/auth/auth-modal";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -80,15 +81,6 @@ const navItems: NavItem[] = [
     name: "게시판",
     link: "/board",
     groups: [
-      {
-        groupName: "매매",
-        items: [
-          { name: "매물 삽니다", link: "/board/buy" },
-          { name: "매물 팝니다", link: "/board/sell" },
-          { name: "번호판 삽니다", link: "/board/plate-buy" },
-          { name: "번호판 팝니다", link: "/board/plate-sell" },
-        ],
-      },
       {
         groupName: "자격증/시험/취업",
         items: [
@@ -160,8 +152,8 @@ export function Header() {
 
   return (
     <div ref={headerRef} className="sticky top-0 z-50 w-full pt-safe">
-      {/* Utility bar */}
-      <div className="border-b border-neutral-200 bg-neutral-900 dark:border-neutral-800 dark:bg-black">
+      {/* Utility bar - hidden on mobile */}
+      <div className="hidden border-b border-neutral-200 bg-neutral-900 md:block dark:border-neutral-800 dark:bg-black">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-1.5">
           <div className="flex items-center gap-4 text-xs text-neutral-400">
             <button
@@ -445,6 +437,23 @@ const MobileNav = () => {
                   </Link>
                 ),
               )}
+              <div className="mt-2 flex flex-col gap-1 border-t border-neutral-200 pt-2 dark:border-neutral-800">
+                {[
+                  { name: "자주 묻는 질문", link: "/faq" },
+                  { name: "문의하기", link: "/contact" },
+                  { name: "광고문의", link: "/advertising" },
+                  { name: "광고결제", link: "/ad-payment" },
+                ].map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.link}
+                    onClick={() => setOpen(false)}
+                    className="cursor-pointer rounded-lg px-3 py-2 text-sm text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
             </div>
           </motion.div>
         )}
@@ -578,6 +587,7 @@ const ThemeToggle = () => {
 // ─── 사용자 인증 영역 ──────────────────────────────
 const UserAuthSection = ({ user }: { user: User | null }) => {
   const router = useRouter();
+  const { openAuthModal } = useAuthModal();
   const [credits, setCredits] = useState<number | null>(null);
 
   useEffect(() => {
@@ -610,18 +620,20 @@ const UserAuthSection = ({ user }: { user: User | null }) => {
   if (!user) {
     return (
       <div className="flex items-center gap-3">
-        <Link
-          href="/login"
+        <button
+          type="button"
+          onClick={() => openAuthModal("login")}
           className="cursor-pointer rounded-lg px-4 py-2 text-sm font-medium text-neutral-600 transition hover:text-black dark:text-neutral-400 dark:hover:text-white"
         >
           로그인
-        </Link>
-        <Link
-          href="/register"
+        </button>
+        <button
+          type="button"
+          onClick={() => openAuthModal("register")}
           className="cursor-pointer rounded-lg bg-orange-600 px-5 py-2 text-sm font-bold text-white transition hover:bg-orange-700 dark:bg-orange-600 dark:text-white dark:hover:bg-orange-700"
         >
           회원가입
-        </Link>
+        </button>
       </div>
     );
   }

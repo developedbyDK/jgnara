@@ -365,9 +365,9 @@ const MobileSidebar = ({
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="fixed inset-y-4 left-4 z-50 w-72 border border-white/10 bg-black px-4 py-6 shadow-xl"
+              className="fixed inset-y-4 left-4 z-50 flex w-72 flex-col border border-white/10 bg-black px-4 py-6 shadow-xl"
             >
-              <div className="mb-4 flex items-center justify-between">
+              <div className="mb-4 flex shrink-0 items-center justify-between">
                 <h2 className="text-base font-bold text-white">
                   중장비 카테고리
                 </h2>
@@ -379,9 +379,9 @@ const MobileSidebar = ({
                 </button>
               </div>
 
-              <div className="h-px w-full bg-white/15" />
+              <div className="h-px w-full shrink-0 bg-white/15" />
 
-              <nav className="mt-3 flex flex-col gap-0.5 overflow-y-auto">
+              <nav className="mt-3 flex flex-1 flex-col gap-0.5 overflow-y-auto">
                 {heavyCategories.map((cat) => (
                   <div key={cat.href}>
                     <div className="flex items-center">

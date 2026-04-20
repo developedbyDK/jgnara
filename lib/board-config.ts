@@ -8,16 +8,6 @@ export type BoardConfig = {
 };
 
 // ─── Category Color Presets ─────────────────────────
-const TRADE_COLORS: Record<string, string> = {
-  굴삭기: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
-  지게차: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-  크레인: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300",
-  로더: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
-  덤프: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
-  불도저: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",
-  기타: "bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300",
-};
-
 const CERT_COLORS: Record<string, string> = {
   굴착기: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
   지게차: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
@@ -60,40 +50,6 @@ const DAILY_COLORS: Record<string, string> = {
 
 // ─── Board Configs ──────────────────────────────────
 export const BOARD_CONFIGS: Record<string, BoardConfig> = {
-  // ── 매매 ──
-  buy: {
-    slug: "buy",
-    title: "매물 삽니다",
-    description: "중장비 매물을 구매하고 싶은 분들의 게시판입니다",
-    group: "매매",
-    categories: ["전체", "굴삭기", "지게차", "크레인", "로더", "덤프", "기타"],
-    categoryColors: TRADE_COLORS,
-  },
-  sell: {
-    slug: "sell",
-    title: "매물 팝니다",
-    description: "중장비 매물을 판매하고 싶은 분들의 게시판입니다",
-    group: "매매",
-    categories: ["전체", "굴삭기", "지게차", "크레인", "로더", "덤프", "기타"],
-    categoryColors: TRADE_COLORS,
-  },
-  "plate-buy": {
-    slug: "plate-buy",
-    title: "번호판 삽니다",
-    description: "건설기계 번호판 구매 게시판입니다",
-    group: "매매",
-    categories: ["전체", "굴삭기", "지게차", "크레인", "로더", "덤프", "기타"],
-    categoryColors: TRADE_COLORS,
-  },
-  "plate-sell": {
-    slug: "plate-sell",
-    title: "번호판 팝니다",
-    description: "건설기계 번호판 판매 게시판입니다",
-    group: "매매",
-    categories: ["전체", "굴삭기", "지게차", "크레인", "로더", "덤프", "기타"],
-    categoryColors: TRADE_COLORS,
-  },
-
   // ── 자격증/시험/취업 ──
   "license-info": {
     slug: "license-info",

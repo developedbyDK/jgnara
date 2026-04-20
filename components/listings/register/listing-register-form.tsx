@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
-import Link from "next/link"
+import { useAuthModal } from "@/components/auth/auth-modal"
 import { createClient } from "@/lib/supabase/client"
 import { compressImageToWebP } from "@/lib/utils/compress-image"
 import type { User } from "@supabase/supabase-js"
@@ -29,14 +29,6 @@ import { Button } from "@/components/ui/button"
 import { Button as StatefulButton } from "@/components/ui/stateful-button"
 import { Separator } from "@/components/ui/separator"
 import { Label } from "@/components/ui/label"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import { PhotoUploadSlot } from "@/components/listings/register/photo-upload-slot"
 import {
   YEAR_OPTIONS,
@@ -119,8 +111,8 @@ export function ListingRegisterForm({
   initialPhotos,
 }: ListingRegisterFormProps) {
   const router = useRouter()
+  const { openAuthModal } = useAuthModal()
   const [user, setUser] = useState<User | null>(null)
-  const [showLoginModal, setShowLoginModal] = useState(false)
   const [formData, setListingFormData] = useState<ListingFormData>(initialData ?? initialListingFormData)
   const { parentOptions, getChildOptions, getLabelById } = useHierarchicalCategories()
   const [photos, setPhotos] = useState<(File | null)[]>(
@@ -194,7 +186,7 @@ export function ListingRegisterForm({
 
   async function handleSubmit() {
     if (mode === "create" && !user) {
-      setShowLoginModal(true)
+      openAuthModal("login")
       throw new Error("login_required")
     }
 
@@ -802,29 +794,6 @@ export function ListingRegisterForm({
         </StatefulButton>
       </div>
 
-      {/* 비회원 로그인 유도 모달 */}
-      <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle>로그인 필요</DialogTitle>
-            <DialogDescription>
-              매물등록은 회원만 가능합니다.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              className="cursor-pointer"
-              onClick={() => setShowLoginModal(false)}
-            >
-              닫기
-            </Button>
-            <Button asChild className="cursor-pointer">
-              <Link href="/login">로그인하기</Link>
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </form>
   )
 }

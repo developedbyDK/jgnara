@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useAuthModal } from "@/components/auth/auth-modal";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -155,6 +156,7 @@ function formatDate(dateStr: string) {
 
 // ─── Component ───────────────────────────────────────
 export function AdPaymentContent() {
+  const { openAuthModal } = useAuthModal();
   const [products, setProducts] = useState<AdProduct[]>([]);
   const [purchases, setPurchases] = useState<AdPurchase[]>([]);
   const [loading, setLoading] = useState(true);
@@ -507,12 +509,13 @@ export function AdPaymentContent() {
         <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-6 text-center dark:border-neutral-800 dark:bg-neutral-900">
           <p className="text-sm text-neutral-500 dark:text-neutral-400">
             광고를 결제하려면 먼저{" "}
-            <Link
-              href="/login"
+            <button
+              type="button"
+              onClick={() => openAuthModal("login")}
               className="cursor-pointer font-medium text-orange-600 underline"
             >
               로그인
-            </Link>
+            </button>
             해주세요.
           </p>
         </div>
